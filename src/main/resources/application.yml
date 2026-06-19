@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: coaching_center_offline_support
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/coaching_center_offline_support
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+jwt:
+  security: myultralongjlarwjiofdsjwrfmsdmnknwlfdmnmnlwedrnflkn
