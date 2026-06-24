@@ -5,5 +5,5 @@ public enum Role {
     STUDENT,
     TEACHER,
     PARENT,
-    GUEST
+    PENDING
 }
