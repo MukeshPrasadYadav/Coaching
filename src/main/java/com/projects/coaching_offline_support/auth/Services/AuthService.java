@@ -8,7 +8,9 @@ import com.projects.coaching_offline_support.user.User;
 
 public interface AuthService {
     SignupResponse signUp(SignupRequest request);
-      SignInResponse signin(SignInReuest request);
+    SignInResponse signin(SignInReuest request);
+    SignInResponse refreshToken(String refreshToken);
+
 
 
 }

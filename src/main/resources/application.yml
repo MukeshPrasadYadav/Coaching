@@ -17,3 +17,6 @@ spring:
         format_sql: true
 jwt:
   security: myultralongjlarwjiofdsjwrfmsdmnknwlfdmnmnlwedrnflkn
+logging:
+  level:
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
