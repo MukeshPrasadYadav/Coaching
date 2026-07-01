@@ -1,4 +1,4 @@
-package com.projects.coaching_offline_support.config;
+package com.projects.coaching_offline_support.common.config;
 
 
 import com.projects.coaching_offline_support.common.ServiceImpl.AuditorAwareImpl;

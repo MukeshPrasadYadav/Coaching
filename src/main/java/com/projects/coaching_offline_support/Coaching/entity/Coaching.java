@@ -1,10 +1,14 @@
 package com.projects.coaching_offline_support.Coaching.entity;
 
 
+import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
+import com.projects.coaching_offline_support.student.entity.Student;
+import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -33,4 +37,13 @@ public class Coaching extends BaseEntity {
 
     @Column(nullable = false)
     private String ownerEmail;
+
+    @ManyToMany(mappedBy = "coaching")
+    private List<Student> students;
+
+    @OneToMany(mappedBy = "coaching")
+    private List<Batch> batches;
+
+    @ManyToMany(mappedBy = "coaching")
+    private List<Teacher> teachers;
 }
