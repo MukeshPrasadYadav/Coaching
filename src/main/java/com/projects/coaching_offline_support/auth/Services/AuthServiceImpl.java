@@ -4,8 +4,9 @@ import com.projects.coaching_offline_support.auth.dtos.SignInResponse;
 import com.projects.coaching_offline_support.auth.dtos.SignInReuest;
 import com.projects.coaching_offline_support.auth.dtos.SignupRequest;
 import com.projects.coaching_offline_support.auth.dtos.SignupResponse;
+import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.UserAlreadyExistsException;
-import com.projects.coaching_offline_support.common.Exceptions.UserNotFoundException;
+import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.enums.Permission;
 import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.user.User;
@@ -36,8 +37,7 @@ public class AuthServiceImpl implements AuthService{
                 .name(request.name())
                 .contactNumber(request.contactNumber())
                 .hashedPassword(passwordEncoder.encode(request.password()))
-                .roles(Set.of(Role.ADMIN))
-                .permissions(Set.of(Permission.ADD_COACHING))
+                .permissions(Set.of(Permission.VISIT))
                 .build();
 
         userRepository.save(toBeSaved);
@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public SignInResponse signin(SignInReuest request) {
-        User user = userRepository.findByContactNumber(request.contactNumber()).orElseThrow(() -> new UserNotFoundException("No user found"));
+        User user = userRepository.findByContactNumber(request.contactNumber()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
         if(!passwordEncoder.matches(request.password(),user.getPassword())) throw  new RuntimeException("Bad credentials");
 
@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService{
 
         java.util.UUID id = jwtService.getUserIdFromToken(refreshToken);
         if(id == null) throw  new RuntimeException("bad credentials");
-        User  user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException("No user found"));
+        User  user = userRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("No user found"));
         System.out.println("Id of user"+id);
 
         String accessToken = jwtService.generateAccessToken(user);

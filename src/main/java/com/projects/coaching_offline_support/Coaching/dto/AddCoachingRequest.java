@@ -1,5 +1,8 @@
 package com.projects.coaching_offline_support.Coaching.dto;
 
+import com.projects.coaching_offline_support.common.entity.Address;
+import jakarta.persistence.Embedded;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,8 +17,8 @@ public record AddCoachingRequest(
         String ownerName,
 
         @NotNull(message = "Address of coaching is required")
-        @Size(min = 5,max = 100, message = "Address must be between 5 to 50 characters")
-        String address,
+        @Valid
+        Address address,
 
         @NotNull(message = "Contact number is required")
         @Size(min = 10,max = 10, message = "Contact number must be 10 digit")

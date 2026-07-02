@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.common.Exceptions;
 
 import com.projects.coaching_offline_support.common.dtos.ErrorResponse;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,8 +40,7 @@ public class GlobalExceptionHandler {
     public  ResponseEntity<ErrorResponse> handleMethodArugmentNotValidException(MethodArgumentNotValidException ex){
        List<String> errors = ex.getBindingResult()
                .getAllErrors()
-               .stream().map(error ->
-                       error.getDefaultMessage())
+               .stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
                .collect(Collectors.toList());
 
        ErrorResponse errorResponse = ErrorResponse.builder()

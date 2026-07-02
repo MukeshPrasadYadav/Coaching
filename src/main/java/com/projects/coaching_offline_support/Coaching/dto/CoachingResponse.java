@@ -1,13 +1,19 @@
 package com.projects.coaching_offline_support.Coaching.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.projects.coaching_offline_support.common.entity.Address;
+import lombok.Builder;
+
 import java.util.UUID;
+
 
 public record CoachingResponse(
         UUID id,
-        String name,
         String ownerName,
-        String address,
-        String ownerContactNumber,
-        String ownerEmail
+        String name,
+        Address address,
+        Integer noOfBatches,
+        String ownerContactInfo,
+        Integer noOfStudent
 ) {
 }

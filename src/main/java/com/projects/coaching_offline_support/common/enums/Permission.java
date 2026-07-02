@@ -13,5 +13,6 @@ public enum Permission {
     UPDATE_BATCH,
     ADD_COACHING,
     REMOVE_COACHING,
-    UPDATE_COACHING
+    UPDATE_COACHING,
+    VISIT
 }
