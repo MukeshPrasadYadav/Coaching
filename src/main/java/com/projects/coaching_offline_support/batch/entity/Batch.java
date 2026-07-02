@@ -4,11 +4,15 @@ package com.projects.coaching_offline_support.batch.entity;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.batch.enums.BatchStatus;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
+import com.projects.coaching_offline_support.common.entity.Timing;
+import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigInteger;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -37,9 +41,10 @@ public class Batch extends BaseEntity {
    @Builder.Default
     private Integer totalStudents = 0;
 
-   // Todo add timing
-//   @Column(nullable = false)
-//    private  Timing timing;
+   @ElementCollection
+   @CollectionTable(name = "batch_timings")
+   @MapKeyEnumerated(EnumType.STRING)
+   private Map<DaysOfWeek, Timing> timings = new EnumMap<>(DaysOfWeek.class);
 
    @Column(nullable = false)
     private BigInteger fees;

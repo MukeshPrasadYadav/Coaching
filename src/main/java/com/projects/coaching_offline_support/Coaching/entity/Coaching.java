@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.Coaching.entity;
 
 
 import com.projects.coaching_offline_support.batch.entity.Batch;
+import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
@@ -29,8 +30,8 @@ public class Coaching extends BaseEntity {
     @Column(nullable = false,length = 20)
     private String ownerName;
 
-    @Column(nullable = false,length = 100)
-    private String address;
+    @Embedded
+    private Address address;
 
     @Column(nullable = false,length = 10)
     private String ownerContactNumber;

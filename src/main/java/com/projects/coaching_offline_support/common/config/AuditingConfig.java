@@ -1,7 +1,7 @@
 package com.projects.coaching_offline_support.common.config;
 
 
-import com.projects.coaching_offline_support.common.ServiceImpl.AuditorAwareImpl;
+import com.projects.coaching_offline_support.common.Service.impl.AuditorAwareImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;

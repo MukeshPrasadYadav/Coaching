@@ -1,4 +1,4 @@
-package com.projects.coaching_offline_support.common;
+package com.projects.coaching_offline_support.common.Service;
 
 import jakarta.persistence.EntityListeners;
 import org.springframework.data.annotation.CreatedBy;

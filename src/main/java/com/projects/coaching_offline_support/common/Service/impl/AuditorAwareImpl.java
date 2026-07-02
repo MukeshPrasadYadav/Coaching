@@ -1,12 +1,10 @@
-package com.projects.coaching_offline_support.common.ServiceImpl;
+package com.projects.coaching_offline_support.common.Service.impl;
 
 import com.projects.coaching_offline_support.user.User;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
