@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.Coaching.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
 import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.entity.Address;
 import lombok.Builder;
@@ -17,6 +18,6 @@ public record CoachingResponse(
         Integer noOfBatches,
         String ownerContactInfo,
         Integer noOfStudent,
-        List<Batch> batches
+        List<BatchInfo> batches
 ) {
 }

@@ -1,5 +1,6 @@
 package com.projects.coaching_offline_support.teacher.controller;
 
+import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
 import com.projects.coaching_offline_support.teacher.service.TeacherService;
 import jakarta.validation.Valid;
@@ -18,9 +19,11 @@ public class TeacherController {
 
     private final TeacherService teacherService;
 
+    // Todo teacher add is dublicate add validation for adding teacher
     @PostMapping
-    public ResponseEntity<Void> addTeacher(@Valid @RequestBody AddTeacherRequest request){
+    public ResponseEntity<ApiResponse<Void>> addTeacher(@Valid @RequestBody AddTeacherRequest request){
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(teacherService.add(request));
+        teacherService.add(request);
+        return ResponseEntity.ok(ApiResponse.success("Added teacher successfully."));
     }
 }

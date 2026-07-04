@@ -39,12 +39,12 @@ public class Coaching extends BaseEntity {
     @Column(nullable = false)
     private String ownerEmail;
 
-    @ManyToMany(mappedBy = "coaching")
+    @ManyToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Student> students;
 
-    @OneToMany(mappedBy = "coaching")
+    @OneToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Batch> batches;
 
-    @ManyToMany(mappedBy = "coaching")
+    @ManyToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Teacher> teachers;
 }
