@@ -60,14 +60,16 @@ public class CoachingServiceImpl implements CoachingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Coaching not found with id :" + coachingId));
 
         CoachingResponse response = new CoachingResponse(
-                coachingId, coaching.getOwnerName()
-                , coaching.getName(), coaching.getAddress()
-                , coaching.getBatches().size(),
+                coachingId, coaching.getOwnerName(),
+                 coaching.getName(), coaching.getAddress(),
+                 coaching.getBatches().size(),
                 coaching.getOwnerContactNumber(),
-                coaching.getStudents().size());
+                coaching.getStudents().size(),coaching.getBatches());
 
         return Optional.of(response);
     }
+
+
 
 }
 
