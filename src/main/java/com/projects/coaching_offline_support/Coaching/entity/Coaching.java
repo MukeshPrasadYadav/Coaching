@@ -23,7 +23,6 @@ public class Coaching extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
     @Column(nullable = false,length = 50)
     private String name;
 
@@ -32,6 +31,7 @@ public class Coaching extends BaseEntity {
 
     @Embedded
     private Address address;
+
 
     @Column(nullable = false,length = 10)
     private String ownerContactNumber;
