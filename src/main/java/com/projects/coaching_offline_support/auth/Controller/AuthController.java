@@ -1,16 +1,13 @@
 package com.projects.coaching_offline_support.auth.Controller;
 
 import com.projects.coaching_offline_support.auth.Services.AuthService;
-import com.projects.coaching_offline_support.auth.dtos.SignInResponse;
-import com.projects.coaching_offline_support.auth.dtos.SignInReuest;
-import com.projects.coaching_offline_support.auth.dtos.SignupRequest;
-import com.projects.coaching_offline_support.auth.dtos.SignupResponse;
+import com.projects.coaching_offline_support.auth.dtos.*;
+import com.projects.coaching_offline_support.common.utils.CookieUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,27 +25,18 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<SignInResponse> signin(@RequestBody SignInReuest request){
+    public ResponseEntity<Void> signin(@RequestBody SignInReuest request){
         SignInResponse response = authService.signin(request);
-        ResponseCookie accessToken = ResponseCookie.from("access_token",response.accessToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(15*60)
-                .sameSite("Lax")
+        return  ResponseEntity.noContent()
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        CookieUtils.createAccessTokenCookie(response.accessToken()).toString()
+                )
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        CookieUtils.createRefreshTokenCookie(response.refreshToken()).toString()
+                )
                 .build();
-
-        ResponseCookie refreshToken = ResponseCookie.from("refresh_token",response.refreshToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(7*24*60*60)
-                .sameSite("Lax")
-                .build();
-        return  ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE,accessToken.toString())
-                .header(HttpHeaders.SET_COOKIE ,refreshToken.toString())
-                .body(response);
     }
 
     @PostMapping("/refresh")
@@ -58,13 +46,24 @@ public class AuthController {
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElseThrow(()-> new AuthenticationServiceException("No token found."));
-
         SignInResponse response = authService.refreshToken(token);
+        return ResponseEntity.noContent()
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        CookieUtils.createAccessTokenCookie(response.accessToken()).toString()
+                )
+                .build();
+    }
 
-        return  ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE,response.accessToken())
-                .header(HttpHeaders.SET_COOKIE ,token)
-                .body(response);
+    @GetMapping("/get/me")
+    public ResponseEntity<UserDetail> getMe(){
+        return  ResponseEntity.ok(authService.getMe());
+    }
+
+    @PostMapping("/signout")
+    public  ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response){
+        authService.signOut(request,response);
+        return  ResponseEntity.noContent().build() ;
     }
 
 }

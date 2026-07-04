@@ -1,22 +1,27 @@
 package com.projects.coaching_offline_support.auth.Services;
 
-import com.projects.coaching_offline_support.auth.dtos.SignInResponse;
-import com.projects.coaching_offline_support.auth.dtos.SignInReuest;
-import com.projects.coaching_offline_support.auth.dtos.SignupRequest;
-import com.projects.coaching_offline_support.auth.dtos.SignupResponse;
+import com.projects.coaching_offline_support.auth.dtos.*;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.UserAlreadyExistsException;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.enums.Permission;
 import com.projects.coaching_offline_support.common.enums.Role;
+import com.projects.coaching_offline_support.common.utils.CookieUtils;
 import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Service
@@ -26,6 +31,9 @@ public class AuthServiceImpl implements AuthService{
     private  final UserRepository userRepository;
     private final  JwtService jwtService;
     private  final PasswordEncoder passwordEncoder;
+
+
+
     @Override
     public SignupResponse signUp(SignupRequest request) {
 
@@ -46,6 +54,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
+    @Transactional
     public SignInResponse signin(SignInReuest request) {
         User user = userRepository.findByContactNumber(request.contactNumber()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
@@ -54,10 +63,11 @@ public class AuthServiceImpl implements AuthService{
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new SignInResponse(accessToken,refreshToken);
+        return new SignInResponse(accessToken,refreshToken) ;
     }
 
     @Override
+    @Transactional
     public SignInResponse refreshToken(String refreshToken) {
 
         java.util.UUID id = jwtService.getUserIdFromToken(refreshToken);
@@ -66,7 +76,29 @@ public class AuthServiceImpl implements AuthService{
         System.out.println("Id of user"+id);
 
         String accessToken = jwtService.generateAccessToken(user);
-        return  new SignInResponse(accessToken,refreshToken);
+         return new SignInResponse(accessToken,refreshToken);
+    }
+
+    @Override
+    @Transactional
+    public UserDetail getMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authentication.getPrincipal();
+
+        User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
+
+
+       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRoles(),user.getPermissions());
+    }
+
+    @Override
+    @Transactional
+    public void signOut(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtils.deleteCookie(response,"access_token");
+        CookieUtils.deleteCookie(response,"refresh_token");
+        SecurityContextHolder.clearContext();
+        return;
+
     }
 
 }
