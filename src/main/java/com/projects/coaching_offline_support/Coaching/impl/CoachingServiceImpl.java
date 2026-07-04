@@ -6,6 +6,7 @@ import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
+import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.UserAlreadyExistsException;
 import jakarta.transaction.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +66,11 @@ public class CoachingServiceImpl implements CoachingService {
                  coaching.getName(), coaching.getAddress(),
                  coaching.getBatches().size(),
                 coaching.getOwnerContactNumber(),
-                coaching.getStudents().size(),coaching.getBatches());
+                coaching.getStudents().size(),
+                coaching.getBatches().stream()
+                        .map(batch ->
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
+                        .collect(Collectors.toList()));
 
         return Optional.of(response);
     }

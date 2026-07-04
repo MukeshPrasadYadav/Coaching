@@ -5,6 +5,7 @@ import com.projects.coaching_offline_support.Coaching.dto.AddCoachingRequest;
 import com.projects.coaching_offline_support.Coaching.dto.AddCoachingResponse;
 import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
+import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +26,15 @@ public class CoachingController {
     private final CoachingService coachingService;
 
     @PostMapping
-    public ResponseEntity<AddCoachingResponse> addCoaching(@RequestBody @Valid AddCoachingRequest request){
-        return ResponseEntity.ok(coachingService.add(request));
+    public ResponseEntity<ApiResponse<AddCoachingResponse>> addCoaching(@RequestBody @Valid AddCoachingRequest request){
+        AddCoachingResponse response = coachingService.add(request);
+        return ResponseEntity.ok(ApiResponse.success(response,"Added coaching successfully."));
     }
 
     @GetMapping("/{coachingId}")
-    public ResponseEntity<Optional<CoachingResponse>> getCoachingById(@PathVariable UUID coachingId){
-        return ResponseEntity.ok(coachingService.getCoachingById(coachingId));
+    public ResponseEntity<ApiResponse<Optional<CoachingResponse>>> getCoachingById(@PathVariable UUID coachingId){
+        Optional<CoachingResponse>  response = coachingService.getCoachingById(coachingId);
+        return ResponseEntity.ok(ApiResponse.success(response,"Fetched coaching successfully."));
 
     }
 

@@ -1,5 +1,6 @@
 package com.projects.coaching_offline_support.common.Exceptions;
 
+import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.common.dtos.ErrorResponse;
 import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -16,29 +17,30 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExistException(UserAlreadyExistsException ex){
+    public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistException(UserAlreadyExistsException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .status(HttpStatus.CONFLICT)
                 .timeStamp(LocalDateTime.now())
                 .build();
-        return new ResponseEntity<>(errorResponse,HttpStatus.CONFLICT);
+
+        return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(
-            Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .timeStamp(LocalDateTime.now())
                 .build();
-        return new ResponseEntity<>(errorResponse,HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public  ResponseEntity<ErrorResponse> handleMethodArugmentNotValidException(MethodArgumentNotValidException ex){
+    public  ResponseEntity<ApiResponse<Void>> handleMethodArugmentNotValidException(MethodArgumentNotValidException ex){
        List<String> errors = ex.getBindingResult()
                .getAllErrors()
                .stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -50,16 +52,16 @@ public class GlobalExceptionHandler {
                .subErrors(errors)
                .timeStamp(LocalDateTime.now())
                .build();
-       return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+
+       return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BatchTimingConflictException.class)
-    public ResponseEntity<ErrorResponse> handleBatchException(BatchTimingConflictException exception){
+    public ResponseEntity<ApiResponse<Void>> handleBatchException(BatchTimingConflictException exception){
 
         List<String> errors = exception.getCoflicts().stream()
                 .map( ex -> {
-                    StringBuilder errorBuffer = new StringBuilder(ex.batchName() + " already exists for day " + ex.day() + " between " + ex.timing());
-                    return  errorBuffer.toString();
+                    return ex.batchName() + " already exists for day " + ex.day() + " between " + ex.timing();
                 }).toList();
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT)
@@ -68,6 +70,6 @@ public class GlobalExceptionHandler {
                 .timeStamp(LocalDateTime.now())
                 .build();
 
-        return new ResponseEntity<>(errorResponse,HttpStatus.CONFLICT);
+        return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.CONFLICT);
     }
 }
