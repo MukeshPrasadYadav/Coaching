@@ -2,10 +2,13 @@ package com.projects.coaching_offline_support.teacher.entity;
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
+import com.projects.coaching_offline_support.common.entity.Timing;
+import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,7 +50,8 @@ public class Teacher extends BaseEntity {
     @Column(nullable = false)
     private List<String> degrees;
 
-    // Todo add availibility
-//    @Column(nullable = false)
-//    private Map<String,String> availability;
+    @ElementCollection
+    @CollectionTable(name = "batch_timings")
+    @MapKeyEnumerated(EnumType.STRING)
+    private Map<DaysOfWeek, Timing> availability = new EnumMap<>(DaysOfWeek.class);
 }

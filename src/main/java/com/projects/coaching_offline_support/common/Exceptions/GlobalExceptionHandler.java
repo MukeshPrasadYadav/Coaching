@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.common.Exceptions;
 
 import com.projects.coaching_offline_support.common.dtos.ErrorResponse;
+import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +51,23 @@ public class GlobalExceptionHandler {
                .timeStamp(LocalDateTime.now())
                .build();
        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BatchTimingConflictException.class)
+    public ResponseEntity<ErrorResponse> handleBatchException(BatchTimingConflictException exception){
+
+        List<String> errors = exception.getCoflicts().stream()
+                .map( ex -> {
+                    StringBuilder errorBuffer = new StringBuilder(ex.batchName() + " already exists for day " + ex.day() + " between " + ex.timing());
+                    return  errorBuffer.toString();
+                }).toList();
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT)
+                .message(exception.getMessage())
+                .subErrors(errors)
+                .timeStamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(errorResponse,HttpStatus.CONFLICT);
     }
 }

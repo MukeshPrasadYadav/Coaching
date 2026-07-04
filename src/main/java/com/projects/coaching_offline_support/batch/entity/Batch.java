@@ -10,6 +10,7 @@ import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.EnumMap;
 import java.util.Map;
@@ -31,25 +32,29 @@ public class Batch extends BaseEntity {
     @Column(nullable = false,length = 20)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coaching_id")
     private Coaching coaching;
 
-   @OneToOne
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "teacher_id")
     private Teacher teacher;
 
    @Builder.Default
     private Integer totalStudents = 0;
 
    @ElementCollection
-   @CollectionTable(name = "batch_timings")
+   @CollectionTable(name = "teacher_availability")
    @MapKeyEnumerated(EnumType.STRING)
    private Map<DaysOfWeek, Timing> timings = new EnumMap<>(DaysOfWeek.class);
 
    @Column(nullable = false)
-    private BigInteger fees;
+    private BigDecimal fees;
 
    @Column(nullable = false)
+   @Enumerated
    @Builder.Default
     private BatchStatus status = BatchStatus.TO_BE_LAUNCHED;
+   
+    private  String classRoom;
 }
