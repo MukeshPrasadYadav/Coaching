@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.Coaching.entity;
 
 
+import com.projects.coaching_offline_support.Coaching.enums.CoachingStatus;
 import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
@@ -29,6 +30,10 @@ public class Coaching extends BaseEntity {
     @Column(nullable = false,length = 20)
     private String ownerName;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private CoachingStatus status = CoachingStatus.OPEN;
+
     @Embedded
     private Address address;
 
@@ -47,4 +52,6 @@ public class Coaching extends BaseEntity {
 
     @ManyToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Teacher> teachers;
+
+    private String reasonForRemoving;
 }
