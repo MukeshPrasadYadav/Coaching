@@ -4,6 +4,7 @@ package com.projects.coaching_offline_support.Coaching.controller;
 import com.projects.coaching_offline_support.Coaching.dto.AddCoachingRequest;
 import com.projects.coaching_offline_support.Coaching.dto.AddCoachingResponse;
 import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
+import com.projects.coaching_offline_support.Coaching.dto.RemoveCoachingRequest;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import jakarta.validation.Valid;
@@ -33,9 +34,21 @@ public class CoachingController {
 
     @GetMapping("/{coachingId}")
     public ResponseEntity<ApiResponse<Optional<CoachingResponse>>> getCoachingById(@PathVariable UUID coachingId){
+
         Optional<CoachingResponse>  response = coachingService.getCoachingById(coachingId);
         return ResponseEntity.ok(ApiResponse.success(response,"Fetched coaching successfully."));
+    }
 
+    @PostMapping("/{coachingId}")
+    public ResponseEntity<ApiResponse<Void>> removeCoaching(@PathVariable UUID coachingId, @RequestBody @Valid RemoveCoachingRequest request){
+        coachingService.remove(coachingId,request);
+        return ResponseEntity.ok(ApiResponse.success("Coaching closed successfully."));
+    }
+
+    @PutMapping("/{coachingId}/appoint/teacher")
+    public ResponseEntity<ApiResponse<Void>> appointTeacher( @PathVariable UUID coachingId,@RequestBody UUID teacherId){
+        coachingService.addTeacher(coachingId,teacherId);
+        return ResponseEntity.ok(ApiResponse.success("Added teacher successfully"));
     }
 
 }

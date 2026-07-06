@@ -6,6 +6,7 @@ import com.projects.coaching_offline_support.common.entity.Timing;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.EnumMap;
@@ -50,8 +51,14 @@ public class Teacher extends BaseEntity {
     @Column(nullable = false)
     private List<String> degrees;
 
-    @ElementCollection
-    @CollectionTable(name = "batch_timings")
-    @MapKeyEnumerated(EnumType.STRING)
-    private Map<DaysOfWeek, Timing> availability = new EnumMap<>(DaysOfWeek.class);
+    public  void addCoaching(Coaching coaching){
+        this.coaching.add(coaching);
+        coaching.getTeachers().add(this);
+    }
+
+    public void removeCoaching(Coaching coaching){
+        this.coaching.remove(coaching);
+        coaching.getTeachers().remove(this);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.batch.entity;
 
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
+import com.projects.coaching_offline_support.Coaching.enums.ReasonToRemoveCoaching;
 import com.projects.coaching_offline_support.batch.enums.BatchStatus;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.common.entity.Timing;
@@ -57,4 +58,6 @@ public class Batch extends BaseEntity {
     private BatchStatus status = BatchStatus.TO_BE_LAUNCHED;
    
     private  String classRoom;
+
+    private String reasonToClose;
 }

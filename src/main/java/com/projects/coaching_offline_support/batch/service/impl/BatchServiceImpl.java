@@ -41,7 +41,6 @@ public class BatchServiceImpl implements BatchService {
 
     @Transactional
     @Override
-
     public Void addBatch(AddBatchRequest request) {
 
        Coaching coaching =coachingRepository.findById(request.coachingId())
