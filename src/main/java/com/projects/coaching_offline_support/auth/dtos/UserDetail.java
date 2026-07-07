@@ -11,7 +11,6 @@ public record UserDetail(
         String name,
         String email,
         String contactInfo,
-        Set<Role> roles,
-        Set<Permission> permissions
+        Role role
 ) {
 }

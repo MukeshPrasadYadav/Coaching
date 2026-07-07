@@ -3,6 +3,7 @@ package com.projects.coaching_offline_support.user;
 import com.projects.coaching_offline_support.common.enums.Permission;
 import com.projects.coaching_offline_support.common.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,17 +29,16 @@ public class User implements UserDetails {
     @Column(nullable = false,length = 50)
     private String name;
 
-    @Column(nullable = false,length = 15)
+
     private String contactNumber;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private Set<Role> roles = Set.of(Role.PENDING);
+    private Role role;
 
-    @Enumerated(EnumType.STRING)
-    private Set<Permission> permissions;
 
+    @Email
+    @Column(nullable = false,unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -46,16 +46,13 @@ public class User implements UserDetails {
 
 
 
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        List<GrantedAuthority> authorities = new ArrayList<>(roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).toList());
-
-        if(permissions != null)
-            authorities.addAll(
-                    permissions.stream().map(permission -> new SimpleGrantedAuthority(permission.name())).toList()
-            );
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if(role != null) authorities.add(new SimpleGrantedAuthority("ROLE_"+role.name()));
 
         return  authorities;
     }
@@ -67,6 +64,6 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.name;
+        return this.email;
     }
 }

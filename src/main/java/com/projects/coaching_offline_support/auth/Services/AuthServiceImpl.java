@@ -37,26 +37,26 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public SignupResponse signUp(SignupRequest request) {
 
-        Optional<User> user = userRepository.findByContactNumber(request.contactNumber());
+        Optional<User> user = userRepository.findByEmail(request.email());
 
         if(user.isPresent()) throw  new UserAlreadyExistsException("User already exists.");
 
         User toBeSaved = User.builder()
+                .email(request.email())
                 .name(request.name())
-                .contactNumber(request.contactNumber())
                 .hashedPassword(passwordEncoder.encode(request.password()))
-                .permissions(Set.of(Permission.VISIT))
+                .role(request.role())
                 .build();
 
         userRepository.save(toBeSaved);
 
-        return new SignupResponse(toBeSaved.getId(),toBeSaved.getName(),toBeSaved.getRoles().toString());
+        return new SignupResponse(toBeSaved.getId(),toBeSaved.getName(),toBeSaved.getRole().toString());
     }
 
     @Override
     @Transactional
     public SignInResponse signin(SignInReuest request) {
-        User user = userRepository.findByContactNumber(request.contactNumber()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
+        User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
         if(!passwordEncoder.matches(request.password(),user.getPassword())) throw  new RuntimeException("Bad credentials");
 
@@ -84,11 +84,15 @@ public class AuthServiceImpl implements AuthService{
     public UserDetail getMe() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User authenticatedUser = (User) authentication.getPrincipal();
+        System.out.println(authentication);
+        System.out.println(authentication.getClass());
+        System.out.println(authentication.getPrincipal());
+        System.out.println(authentication.getPrincipal().getClass());
 
         User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
 
-       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRoles(),user.getPermissions());
+       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole());
     }
 
     @Override
