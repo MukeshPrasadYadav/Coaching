@@ -14,5 +14,5 @@ public enum Permission {
     ADD_COACHING,
     REMOVE_COACHING,
     UPDATE_COACHING,
-    VISIT
+    TEACH
 }

@@ -1,18 +1,18 @@
 package com.projects.coaching_offline_support.batch.service.impl;
 
-import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
 import com.projects.coaching_offline_support.batch.dto.request.AddBatchRequest;
+import com.projects.coaching_offline_support.batch.dto.request.BatchFilter;
 import com.projects.coaching_offline_support.batch.dto.response.BatchConflictResponse;
 import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
 import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.batch.repository.BatchRepository;
 import com.projects.coaching_offline_support.batch.service.BatchService;
+import com.projects.coaching_offline_support.batch.specification.BatchSpecification;
 import com.projects.coaching_offline_support.common.Exceptions.BatchTimingConflictException;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
-import com.projects.coaching_offline_support.common.Exceptions.UserAlreadyExistsException;
 import com.projects.coaching_offline_support.common.entity.Timing;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
@@ -20,14 +20,17 @@ import com.projects.coaching_offline_support.teacher.repository.TeacherRepositor
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +44,7 @@ public class BatchServiceImpl implements BatchService {
 
     @Transactional
     @Override
-    public Void addBatch(AddBatchRequest request) {
+    public void addBatch(AddBatchRequest request) {
 
        Coaching coaching =coachingRepository.findById(request.coachingId())
                 .orElseThrow(() -> new ResourceNotFoundException("Coaching does not exist with the id: "+request.coachingId()));
@@ -87,9 +90,6 @@ public class BatchServiceImpl implements BatchService {
         System.out.println(coaching);
 
 
-
-
-        return null;
     }
 
     @Override
@@ -105,6 +105,22 @@ public class BatchServiceImpl implements BatchService {
                 batch.getCoaching().getName(),batch.getStatus());
 
 
+    }
+
+    @Override
+    public Page<BatchInfo> getBatch(BatchFilter filter,int page,int size) {
+
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
+        Pageable pagable = PageRequest.of(page,size,sort);
+        Page<Batch> info = batchRepository.findAll(
+                BatchSpecification.filter(filter),pagable
+        );
+
+       return info.map(batch -> new BatchInfo(
+               batch.getId(),batch.getName(),
+               batch.getTeacher().getName(),batch.getTimings(),
+               batch.getCoaching().getName(),batch.getStatus()
+       ));
     }
 
     private boolean isOverLap(Timing existing, Timing requested) {
