@@ -15,6 +15,7 @@ public record UserDetail(
         String contactInfo,
         Role role,
         List<UUID>coachingIds,
-        List<UUID> batchIds
+        List<UUID> batchIds,
+        boolean isProfileCompleted
 ) {
 }

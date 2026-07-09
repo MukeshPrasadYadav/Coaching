@@ -64,7 +64,6 @@ public class CoachingServiceImpl implements CoachingService {
         coachingRepository.save(addedCoaching);
 
         user.setCoachingIds(addedCoaching.getId());
-
         return new AddCoachingResponse(
                 addedCoaching.getId(),request.name(),
                 request.ownerName(),request.address(),
