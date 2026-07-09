@@ -35,7 +35,8 @@ public class Coaching extends BaseEntity {
     private CoachingStatus status = CoachingStatus.OPEN;
 
     @Embedded
-    private Address address;
+    @Builder.Default
+    private Address address = new Address();
 
 
     @Column(nullable = false,length = 10)
@@ -50,7 +51,12 @@ public class Coaching extends BaseEntity {
     @OneToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Batch> batches;
 
-    @ManyToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name ="coaching_teacher",
+            joinColumns = @JoinColumn(name = "coaching_id"),
+            inverseJoinColumns = @JoinColumn(name = "teacher_id")
+    )
     private List<Teacher> teachers;
 
     private String reasonForRemoving;

@@ -16,8 +16,9 @@ public record CoachingResponse(
         String name,
         Address address,
         Integer noOfBatches,
-        String ownerContactInfo,
+        String ownerContactNumber,
         Integer noOfStudent,
-        List<BatchInfo> batches
+        List<BatchInfo> batches,
+        String ownerEmail
 ) {
 }

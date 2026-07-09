@@ -1,10 +1,8 @@
 package com.projects.coaching_offline_support.Coaching.service;
 
-import com.projects.coaching_offline_support.Coaching.dto.AddCoachingRequest;
-import com.projects.coaching_offline_support.Coaching.dto.AddCoachingResponse;
-import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
-import com.projects.coaching_offline_support.Coaching.dto.RemoveCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.*;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
+import com.projects.coaching_offline_support.common.entity.Address;
 import jakarta.validation.Valid;
 
 import java.util.Optional;
@@ -19,4 +17,8 @@ public interface CoachingService {
     void remove(UUID coachingId, @Valid RemoveCoachingRequest request);
 
     void addTeacher(UUID teacherId,UUID coachingId);
+
+    CoachingResponse updateAddress(UUID coachingID, Address address);
+
+    CoachingResponse updateInfo(UUID coachingID, BasicCoachingInfo info);
 }

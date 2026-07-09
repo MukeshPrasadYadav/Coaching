@@ -4,5 +4,5 @@ import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherReque
 import jakarta.validation.Valid;
 
 public interface TeacherService {
-    Void add(@Valid AddTeacherRequest request);
+    void add(@Valid AddTeacherRequest request);
 }

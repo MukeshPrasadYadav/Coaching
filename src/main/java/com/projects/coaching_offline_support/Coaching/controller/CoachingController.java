@@ -1,12 +1,10 @@
 package com.projects.coaching_offline_support.Coaching.controller;
 
 
-import com.projects.coaching_offline_support.Coaching.dto.AddCoachingRequest;
-import com.projects.coaching_offline_support.Coaching.dto.AddCoachingResponse;
-import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
-import com.projects.coaching_offline_support.Coaching.dto.RemoveCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.*;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
+import com.projects.coaching_offline_support.common.entity.Address;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,10 +43,23 @@ public class CoachingController {
         return ResponseEntity.ok(ApiResponse.success("Coaching closed successfully."));
     }
 
-    @PutMapping("/{coachingId}/appoint/teacher")
+    @PatchMapping("/{coachingId}/appoint/teacher")
     public ResponseEntity<ApiResponse<Void>> appointTeacher( @PathVariable UUID coachingId,@RequestBody UUID teacherId){
         coachingService.addTeacher(coachingId,teacherId);
         return ResponseEntity.ok(ApiResponse.success("Added teacher successfully"));
     }
+
+    @PatchMapping("/{coachingId}/updateAddress")
+    public ResponseEntity<ApiResponse<CoachingResponse>> updateAddress(@PathVariable UUID coachingId, @RequestBody Address address){
+       CoachingResponse response = coachingService.updateAddress(coachingId,address);
+        return ResponseEntity.ok(ApiResponse.success(response,"Address updated successfully"));
+    }
+
+    @PatchMapping("/{coachingId}/updateInfo")
+    public ResponseEntity<ApiResponse<Void>> updateInfo(@PathVariable UUID coachingId, @RequestBody BasicCoachingInfo info){
+       CoachingResponse response = coachingService.updateInfo(coachingId,info);
+        return ResponseEntity.ok(ApiResponse.success("Address updated successfully"));
+    }
+
 
 }

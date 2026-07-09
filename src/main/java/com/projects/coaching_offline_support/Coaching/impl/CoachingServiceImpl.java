@@ -1,9 +1,6 @@
 package com.projects.coaching_offline_support.Coaching.impl;
 
-import com.projects.coaching_offline_support.Coaching.dto.AddCoachingRequest;
-import com.projects.coaching_offline_support.Coaching.dto.AddCoachingResponse;
-import com.projects.coaching_offline_support.Coaching.dto.CoachingResponse;
-import com.projects.coaching_offline_support.Coaching.dto.RemoveCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.*;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.enums.CoachingStatus;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
@@ -14,8 +11,11 @@ import com.projects.coaching_offline_support.batch.enums.BatchStatus;
 import com.projects.coaching_offline_support.batch.repository.BatchRepository;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.UserAlreadyExistsException;
+import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
+import com.projects.coaching_offline_support.user.User;
+import com.projects.coaching_offline_support.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
@@ -39,6 +39,7 @@ public class CoachingServiceImpl implements CoachingService {
     private final CoachingRepository coachingRepository;
     private final TeacherRepository teacherRepository;
     private final BatchRepository batchRepository;
+    private final UserRepository userRepository;
     private final  String CACHE_NAME = "Coaching";
 
     @Override
@@ -46,6 +47,9 @@ public class CoachingServiceImpl implements CoachingService {
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('ADD_COACHING')")
     @CachePut(cacheNames = CACHE_NAME, key = "#result.id")
     public AddCoachingResponse add(AddCoachingRequest request) {
+
+        User user =userRepository.findByEmail(request.ownerEmail()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
+
         log.info("Adding new Coaching");
         boolean isExist = coachingRepository.existsByName(request.name());
         if(isExist) throw new UserAlreadyExistsException("Coaching already  exists");
@@ -59,12 +63,15 @@ public class CoachingServiceImpl implements CoachingService {
                 .build();
         coachingRepository.save(addedCoaching);
 
+        user.setCoachingIds(addedCoaching.getId());
+
         return new AddCoachingResponse(
                 addedCoaching.getId(),request.name(),
                 request.ownerName(),request.address(),
                 request.ownerContactNumber(),request.ownerEmail());
     }
 
+    
     @Override
     @Cacheable(cacheNames = CACHE_NAME, key = "#coachingId")
     public Optional<CoachingResponse> getCoachingById(UUID coachingId) {
@@ -80,8 +87,8 @@ public class CoachingServiceImpl implements CoachingService {
                 coaching.getStudents().size(),
                 coaching.getBatches().stream()
                         .map(batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
-                        .collect(Collectors.toList()));
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
+                        .collect(Collectors.toList()),coaching.getOwnerEmail());
 
         return Optional.of(response);
     }
@@ -115,6 +122,61 @@ public class CoachingServiceImpl implements CoachingService {
         coaching.getTeachers().add(teacher);
         teacher.addCoaching(coaching);
         coachingRepository.save(coaching);
+    }
+
+    @Override
+    @Transactional
+    @CachePut(cacheNames = CACHE_NAME, key = "#result.id")
+    public CoachingResponse updateAddress(UUID coachingId, Address address) {
+        Coaching coaching = coachingRepository.findById(coachingId)
+                .orElseThrow(() -> new ResourceNotFoundException("No coaching found."));
+
+        if(coaching.getAddress().equals(address)){
+            throw  new UserAlreadyExistsException("Address already same");
+        }
+        coaching.setAddress(address);
+        coachingRepository.save(coaching);
+        return new CoachingResponse(coachingId,coaching.getOwnerName(),
+                coaching.getName(),coaching.getAddress(),
+                coaching.getBatches().size(),coaching.getOwnerContactNumber(),
+                coaching.getStudents().size(),coaching.getBatches().stream().map(
+                        batch ->
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
+                .collect(Collectors.toList()),coaching.getOwnerEmail());
+
+
+
+    }
+
+    @Override
+    @Transactional
+    public CoachingResponse updateInfo(UUID coachingId, BasicCoachingInfo info) {
+
+        Coaching coaching = coachingRepository.findById(coachingId)
+                .orElseThrow(() -> new ResourceNotFoundException("No coaching found."));
+
+        if(!coaching.getName().equals(info.name())){
+            coaching.setName(info.name());
+        }
+        if(! coaching.getOwnerName().equals(info.ownerName())){
+            coaching.setOwnerName(info.ownerName());
+        }
+        if(! coaching.getOwnerContactNumber().equals(info.ownerContactNumber())){
+            coaching.setOwnerContactNumber(info.ownerContactNumber());
+        }
+        if(! coaching.getOwnerEmail().equals(info.ownerEmail())){
+            coaching.setOwnerEmail(info.ownerEmail());
+        }
+        coachingRepository.save(coaching);
+
+
+        return new CoachingResponse(coachingId,coaching.getOwnerName(),
+                coaching.getName(),coaching.getAddress(),
+                coaching.getBatches().size(),coaching.getOwnerContactNumber(),
+                coaching.getStudents().size(),coaching.getBatches().stream().map(
+                        batch ->
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
+                .collect(Collectors.toList()),coaching.getOwnerEmail());
     }
 
     private void UnlinkBatches(Coaching coaching){

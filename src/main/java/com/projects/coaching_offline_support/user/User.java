@@ -1,13 +1,11 @@
 package com.projects.coaching_offline_support.user;
 
+import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.enums.Permission;
 import com.projects.coaching_offline_support.common.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +17,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
 public class User implements UserDetails {
 
@@ -44,6 +43,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private  String hashedPassword;
 
+    @Builder.Default
+    private List<UUID> coachingIds = new ArrayList<>();
+
+    @Builder.Default
+    private List<UUID> batchIds = new ArrayList<>();
+
+
+
 
 
 
@@ -65,5 +72,9 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    public void setCoachingIds(UUID coachingId) {
+        this.getCoachingIds().add(coachingId);
     }
 }
