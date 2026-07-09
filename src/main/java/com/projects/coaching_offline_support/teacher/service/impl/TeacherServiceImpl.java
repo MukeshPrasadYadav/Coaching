@@ -16,17 +16,16 @@ public class TeacherServiceImpl implements TeacherService {
     private final TeacherRepository teacherRepository;
 
     @Override
-    public Void add(AddTeacherRequest request) {
+    public void add(AddTeacherRequest request) {
 
         Teacher teacher = Teacher.builder()
                 .fee(request.fee())
-                .name(request.name())
                 .degrees(request.degrees())
-                .subjects(request.subjects())
-                .contactInfo(request.contactInfo())   // todo check for coaching add and availity if present
+                .subjects(request.subjects()) // todo check for coaching add and availity if present
                 .build();
 
         teacherRepository.save(teacher);
-        return null;
     }
-}
+
+
+    }

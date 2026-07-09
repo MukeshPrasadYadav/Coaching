@@ -4,15 +4,13 @@ import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.common.entity.Timing;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
+import com.projects.coaching_offline_support.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 @Entity
@@ -28,37 +26,46 @@ public class Teacher extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false,length = 20)
-    private String name;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @MapsId
+    private User user;
 
-    @Column(nullable = false)
-    private List<String> subjects;
 
-    @ManyToMany
-    @JoinTable(
-            name = "teacher_coaching",
-            joinColumns = @JoinColumn(name = "teacher_id"),
-            inverseJoinColumns = @JoinColumn(name = "coaching_id")
+    @ElementCollection
+    @CollectionTable(
+            name = "teacher_subjects",
+            joinColumns = @JoinColumn(name = "teacher_id")
     )
-    private List<Coaching> coaching;
+    @Column(name = "subject")
+    @Builder.Default
+    private List<String> subjects = new ArrayList<>();
 
-    @Column(nullable = false,length = 10)
-    private String contactInfo;
 
-    @Column(nullable = false)
+    @ElementCollection
+    @CollectionTable(
+            name = "teacher_degrees",
+            joinColumns = @JoinColumn(name = "teacher_id")
+    )
+    @Column(name = "degree")
+    @Builder.Default
+    private List<String> degrees = new ArrayList<>();
+
+
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal fee;
 
-    @Column(nullable = false)
-    private List<String> degrees;
+    @ManyToMany(mappedBy = "teachers")
+    @Builder.Default
+    private List<Coaching> coachings = new ArrayList<>();
 
-    public  void addCoaching(Coaching coaching){
-        this.coaching.add(coaching);
+    public void addCoaching(Coaching coaching) {
+        coachings.add(coaching);
         coaching.getTeachers().add(this);
     }
 
-    public void removeCoaching(Coaching coaching){
-        this.coaching.remove(coaching);
+    public void removeCoaching(Coaching coaching) {
+        coachings.remove(coaching);
         coaching.getTeachers().remove(this);
     }
-
 }

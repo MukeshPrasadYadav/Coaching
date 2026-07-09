@@ -11,4 +11,6 @@ import java.util.UUID;
 @Repository
 public interface CoachingRepository extends JpaRepository<Coaching, UUID> {
     boolean existsByName(String name);
+
+    Coaching findByOwnerEmail(String email);
 }
