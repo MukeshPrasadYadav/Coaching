@@ -12,7 +12,7 @@ public record UserDetail(
         UUID id,
         String name,
         String email,
-        String contactInfo,
+        String contactNumber,
         Role role,
         List<UUID>coachingIds,
         List<UUID> batchIds,

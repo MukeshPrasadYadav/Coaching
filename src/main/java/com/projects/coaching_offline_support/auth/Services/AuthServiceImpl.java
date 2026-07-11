@@ -84,13 +84,9 @@ public class AuthServiceImpl implements AuthService{
     public UserDetail getMe() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User authenticatedUser = (User) authentication.getPrincipal();
-        System.out.println(authentication);
-        System.out.println(authentication.getClass());
-        System.out.println(authentication.getPrincipal());
-        System.out.println(authentication.getPrincipal().getClass());
+
 
         User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
-
 
        return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole(),user.getCoachingIds(),user.getBatchIds(),user.isProfileCompleted());
     }

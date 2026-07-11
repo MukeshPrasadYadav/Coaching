@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.teacher.entity;
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
+import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.common.entity.Timing;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
@@ -23,14 +24,12 @@ import java.util.*;
 public class Teacher extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     @MapsId
     private User user;
-
 
     @ElementCollection
     @CollectionTable(
@@ -58,6 +57,11 @@ public class Teacher extends BaseEntity {
     @ManyToMany(mappedBy = "teachers")
     @Builder.Default
     private List<Coaching> coachings = new ArrayList<>();
+    @Embedded
+    @Builder.Default
+    private Address address = new Address();
+
+
 
     public void addCoaching(Coaching coaching) {
         coachings.add(coaching);
