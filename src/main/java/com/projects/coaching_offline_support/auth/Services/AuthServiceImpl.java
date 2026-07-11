@@ -92,7 +92,7 @@ public class AuthServiceImpl implements AuthService{
         User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
 
-       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole(),user.getCoachingIds(),user.getBatchIds());
+       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole(),user.getCoachingIds(),user.getBatchIds(),user.isProfileCompleted());
     }
 
     @Override

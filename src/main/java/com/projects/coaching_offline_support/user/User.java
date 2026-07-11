@@ -49,6 +49,9 @@ public class User implements UserDetails {
     @Builder.Default
     private List<UUID> batchIds = new ArrayList<>();
 
+    @Builder.Default
+    private boolean isProfileCompleted =false;
+
 
 
 
@@ -76,5 +79,6 @@ public class User implements UserDetails {
 
     public void setCoachingIds(UUID coachingId) {
         this.getCoachingIds().add(coachingId);
+        this.setProfileCompleted(true);
     }
 }
