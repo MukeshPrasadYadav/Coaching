@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.common.Exceptions;
 
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.common.dtos.ErrorResponse;
+import org.apache.coyote.BadRequestException;
 import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -71,5 +72,16 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadRequestException(BadRequestException ex){
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message(ex.getMessage())
+                .timeStamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.BAD_REQUEST);
     }
 }

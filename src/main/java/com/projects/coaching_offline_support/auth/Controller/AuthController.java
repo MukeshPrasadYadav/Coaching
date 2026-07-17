@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<ApiResponse<Void>> signin(@RequestBody SignInReuest request,HttpServletResponse servletResponse){
+    public ResponseEntity<ApiResponse<Void>> signin(@RequestBody SignInReuest request,HttpServletResponse servletResponse) throws BadRequestException {
         SignInResponse response = authService.signin(request);
 
         return  ResponseEntity.ok()
@@ -44,6 +45,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public  ResponseEntity<ApiResponse<SignInResponse>> refreshToken(HttpServletRequest request){
+
+
         String token = Arrays.stream(request.getCookies())
                 .filter(cookie -> "refresh_token".equals(cookie.getName()))
                 .findFirst()

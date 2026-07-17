@@ -13,20 +13,20 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Address {
 
-    @Column(nullable = false,length = 20)
+    @Column(length = 20)
     @Builder.Default
     private String country = "India";
 
-    @Column(nullable = false,length = 20)
+    @Column(length = 20)
     private String state;
 
-    @Column(nullable = false)
+
     private String area;
 
-    @Column(nullable = false,length = 50)
+    @Column(length = 50)
     private String city;
 
-    @Column(nullable = false,length = 6)
+    @Column(length = 6)
     private String pinCode;
 
     private String postOffice;

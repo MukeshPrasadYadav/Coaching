@@ -7,6 +7,7 @@ import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
+import com.projects.coaching_offline_support.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,25 +26,16 @@ public class Coaching extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(nullable = false,length = 50)
-    private String name;
-
-    @Column(nullable = false,length = 20)
-    private String ownerName;
+    private String coachingName;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private CoachingStatus status = CoachingStatus.OPEN;
 
-    @Embedded
-    @Builder.Default
-    private Address address = new Address();
+    @OneToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
-
-    @Column(nullable = false,length = 10)
-    private String ownerContactNumber;
-
-    @Column(nullable = false)
-    private String ownerEmail;
 
     @ManyToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Student> students;

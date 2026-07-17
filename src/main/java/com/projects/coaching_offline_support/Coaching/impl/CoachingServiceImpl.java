@@ -51,19 +51,21 @@ public class CoachingServiceImpl implements CoachingService {
         User user =userRepository.findByEmail(request.ownerEmail()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
         log.info("Adding new Coaching");
-        boolean isExist = coachingRepository.existsByName(request.name());
+        boolean isExist = coachingRepository.existsByCoachingName(request.name());
         if(isExist) throw new UserAlreadyExistsException("Coaching already  exists");
 
+        user.setContactNumber(request.ownerContactNumber());
+        user.setAddress(request.address());
+        user.setProfileCompleted(true);
+        userRepository.save(user);
+
         Coaching addedCoaching = Coaching.builder()
-                .name(request.name())
-                .address(request.address())
-                .ownerName(request.ownerName())
-                .ownerEmail(request.ownerEmail())
-                .ownerContactNumber(request.ownerContactNumber())
+                .coachingName(request.name())
+                .user(user)
                 .build();
         coachingRepository.save(addedCoaching);
 
-        user.setCoachingIds(addedCoaching.getId());
+
         return new AddCoachingResponse(
                 addedCoaching.getId(),request.name(),
                 request.ownerName(),request.address(),
@@ -79,15 +81,15 @@ public class CoachingServiceImpl implements CoachingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Coaching not found with id :" + coachingId));
 
         CoachingResponse response = new CoachingResponse(
-                coachingId, coaching.getOwnerName(),
-                 coaching.getName(), coaching.getAddress(),
+                coachingId, coaching.getUser().getName(),
+                 coaching.getCoachingName(), coaching.getUser().getAddress(),
                  coaching.getBatches().size(),
-                coaching.getOwnerContactNumber(),
+                coaching.getUser().getContactNumber(),
                 coaching.getStudents().size(),
                 coaching.getBatches().stream()
                         .map(batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
-                        .collect(Collectors.toList()),coaching.getOwnerEmail());
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
+                        .collect(Collectors.toList()),coaching.getUser().getEmail());
 
         return Optional.of(response);
     }
@@ -130,18 +132,18 @@ public class CoachingServiceImpl implements CoachingService {
         Coaching coaching = coachingRepository.findById(coachingId)
                 .orElseThrow(() -> new ResourceNotFoundException("No coaching found."));
 
-        if(coaching.getAddress().equals(address)){
+        if(coaching.getUser().getAddress().equals(address)){
             throw  new UserAlreadyExistsException("Address already same");
         }
-        coaching.setAddress(address);
+        coaching.getUser().setAddress(address);
         coachingRepository.save(coaching);
-        return new CoachingResponse(coachingId,coaching.getOwnerName(),
-                coaching.getName(),coaching.getAddress(),
-                coaching.getBatches().size(),coaching.getOwnerContactNumber(),
+        return new CoachingResponse(coachingId,coaching.getUser().getName(),
+                coaching.getCoachingName(),coaching.getUser().getAddress(),
+                coaching.getBatches().size(),coaching.getUser().getContactNumber(),
                 coaching.getStudents().size(),coaching.getBatches().stream().map(
                         batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
-                .collect(Collectors.toList()),coaching.getOwnerEmail());
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
+                .collect(Collectors.toList()),coaching.getUser().getEmail());
 
 
 
@@ -154,28 +156,28 @@ public class CoachingServiceImpl implements CoachingService {
         Coaching coaching = coachingRepository.findById(coachingId)
                 .orElseThrow(() -> new ResourceNotFoundException("No coaching found."));
 
-        if(!coaching.getName().equals(info.name())){
-            coaching.setName(info.name());
+        if(!coaching.getCoachingName().equals(info.name())){
+            coaching.setCoachingName(info.name());
         }
-        if(! coaching.getOwnerName().equals(info.ownerName())){
-            coaching.setOwnerName(info.ownerName());
+        if(! coaching.getUser().getName().equals(info.ownerName())){
+            coaching.getUser().setName(info.ownerName());
         }
-        if(! coaching.getOwnerContactNumber().equals(info.ownerContactNumber())){
-            coaching.setOwnerContactNumber(info.ownerContactNumber());
+        if(! coaching.getUser().getContactNumber().equals(info.ownerContactNumber())){
+            coaching.getUser().setContactNumber(info.ownerContactNumber());
         }
-        if(! coaching.getOwnerEmail().equals(info.ownerEmail())){
-            coaching.setOwnerEmail(info.ownerEmail());
+        if(! coaching.getUser().getEmail().equals(info.ownerEmail())){
+            coaching.getUser().setEmail(info.ownerEmail());
         }
         coachingRepository.save(coaching);
 
 
-        return new CoachingResponse(coachingId,coaching.getOwnerName(),
-                coaching.getName(),coaching.getAddress(),
-                coaching.getBatches().size(),coaching.getOwnerContactNumber(),
+        return new CoachingResponse(coachingId,coaching.getUser().getName(),
+                coaching.getCoachingName(),coaching.getUser().getAddress(),
+                coaching.getBatches().size(),coaching.getUser().getContactNumber(),
                 coaching.getStudents().size(),coaching.getBatches().stream().map(
                         batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getName(),batch.getStatus()))
-                .collect(Collectors.toList()),coaching.getOwnerEmail());
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
+                .collect(Collectors.toList()),coaching.getUser().getEmail());
     }
 
     private void UnlinkBatches(Coaching coaching){

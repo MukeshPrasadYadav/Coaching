@@ -102,7 +102,7 @@ public class BatchServiceImpl implements BatchService {
         return new BatchInfo(
                 batchId,batch.getName(),
                 batch.getTeacher().getUser().getName(), batch.getTimings(),
-                batch.getCoaching().getName(),batch.getStatus());
+                batch.getCoaching().getCoachingName(),batch.getStatus());
 
 
     }
@@ -119,7 +119,7 @@ public class BatchServiceImpl implements BatchService {
        return info.map(batch -> new BatchInfo(
                batch.getId(),batch.getName(),
                batch.getTeacher().getUser().getName(),batch.getTimings(),
-               batch.getCoaching().getName(),batch.getStatus()
+               batch.getCoaching().getCoachingName(),batch.getStatus()
        ));
     }
 
