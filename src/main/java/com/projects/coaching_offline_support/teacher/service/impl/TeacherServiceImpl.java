@@ -31,13 +31,13 @@ public class TeacherServiceImpl implements TeacherService {
 
         user.setContactNumber(request.contactNumber());
         user.setProfileCompleted(true);
+        user.setAddress(request.address());
       User savedUser =  userRepository.save(user);
 
         Teacher teacher = Teacher.builder()
                 .fee(request.fee())
                 .degrees(request.degrees())
                 .subjects(request.subjects())
-                .address(request.address())
                 .user(savedUser)
                 .build();
 
@@ -52,17 +52,7 @@ public class TeacherServiceImpl implements TeacherService {
         return new TeacherResponse(
                 teacher.getDegrees(),
                 teacher.getSubjects(),
-                teacher.getFee(),
-                Address.builder()
-                        .country(teacher.getAddress().getCountry())
-                        .state(teacher.getAddress().getState())
-                        .area(teacher.getAddress().getArea())
-                        .postOffice(teacher.getAddress().getPostOffice())
-                        .pinCode(teacher.getAddress().getPinCode())
-                        .houseNo(teacher.getAddress().getHouseNo())
-                        .city(teacher.getAddress().getCity())
-                        .building(teacher.getAddress().getBuilding())
-                        .build());
+                teacher.getFee());
     }
 
 

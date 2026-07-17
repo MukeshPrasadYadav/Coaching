@@ -44,13 +44,11 @@ public class User implements UserDetails {
     private  String hashedPassword;
 
     @Builder.Default
-    private List<UUID> coachingIds = new ArrayList<>();
-
-    @Builder.Default
-    private List<UUID> batchIds = new ArrayList<>();
-
-    @Builder.Default
     private boolean isProfileCompleted =false;
+
+    @Embedded
+    @Builder.Default
+    private Address address = new Address();
 
 
 
@@ -77,8 +75,4 @@ public class User implements UserDetails {
         return this.email;
     }
 
-    public void setCoachingIds(UUID coachingId) {
-        this.getCoachingIds().add(coachingId);
-        this.setProfileCompleted(true);
-    }
 }

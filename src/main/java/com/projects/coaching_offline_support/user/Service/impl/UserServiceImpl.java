@@ -10,7 +10,7 @@ import com.projects.coaching_offline_support.teacher.repository.TeacherRepositor
 import com.projects.coaching_offline_support.user.Service.UserService;
 import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
-import com.projects.coaching_offline_support.user.dto.request.BasicInfoUpdateRequests;
+import com.projects.coaching_offline_support.user.dto.request.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateBasicInfo(UUID userId, BasicInfoUpdateRequests request) {
+    public void updateUser(UUID userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No user found."));
         if(! user.getName().equals(request.name())){
             user.setName(request.name());
@@ -39,15 +39,10 @@ public class UserServiceImpl implements UserService {
         if( user.getContactNumber() == null ||! user.getContactNumber().equals(request.contactNumber())){
             user.setContactNumber(request.contactNumber());
         }
+        if( user.getAddress() != null && !user.getAddress().equals(request.address())){
+            user.setAddress(request.address());
+        }
         userRepository.save(user);
-        if(user.getRole().equals(Role.ADMIN)){
-            Coaching coaching = coachingRepository.findByOwnerEmail(request.email());
-            // Add logic here change ownerName, ownerEmail,ownerContactNumber
-        }
-        if(user.getRole().equals(Role.TEACHER)){
-           Teacher teacher = teacherRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No teacher found"));
-           teacher.setUser(user);
-           teacherRepository.save(teacher);
-        }
+
     }
 }

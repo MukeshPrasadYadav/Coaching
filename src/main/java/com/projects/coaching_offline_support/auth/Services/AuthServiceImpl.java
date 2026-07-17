@@ -12,6 +12,7 @@ import com.projects.coaching_offline_support.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +35,7 @@ public class AuthServiceImpl implements AuthService{
 
 
 
+    @Transactional
     @Override
     public SignupResponse signUp(SignupRequest request) {
 
@@ -55,10 +57,10 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public SignInResponse signin(SignInReuest request) {
+    public SignInResponse signin(SignInReuest request) throws BadRequestException {
         User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
-        if(!passwordEncoder.matches(request.password(),user.getPassword())) throw  new RuntimeException("Bad credentials");
+        if(!passwordEncoder.matches(request.password(),user.getPassword())) throw new BadRequestException("Wrong password");
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -88,7 +90,7 @@ public class AuthServiceImpl implements AuthService{
 
         User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
-       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole(),user.getCoachingIds(),user.getBatchIds(),user.isProfileCompleted());
+       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole(),user.isProfileCompleted(),user.getAddress());
     }
 
     @Override

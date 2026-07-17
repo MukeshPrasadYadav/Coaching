@@ -57,9 +57,7 @@ public class Teacher extends BaseEntity {
     @ManyToMany(mappedBy = "teachers")
     @Builder.Default
     private List<Coaching> coachings = new ArrayList<>();
-    @Embedded
-    @Builder.Default
-    private Address address = new Address();
+
 
 
 

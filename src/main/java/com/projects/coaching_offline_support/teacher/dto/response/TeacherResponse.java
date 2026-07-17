@@ -8,7 +8,5 @@ import java.util.List;
 public record TeacherResponse(
         List<String> degrees,
         List<String> subjects,
-        BigDecimal fee,
-        Address address
-) {
+        BigDecimal fee) {
 }
