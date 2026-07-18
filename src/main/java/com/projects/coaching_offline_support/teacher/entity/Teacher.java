@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.teacher.entity;
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
+import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.common.entity.Timing;
@@ -38,7 +39,7 @@ public class Teacher extends BaseEntity {
     )
     @Column(name = "subject")
     @Builder.Default
-    private List<String> subjects = new ArrayList<>();
+    private Set<String> subjects = new HashSet<>();
 
 
     @ElementCollection
@@ -48,7 +49,7 @@ public class Teacher extends BaseEntity {
     )
     @Column(name = "degree")
     @Builder.Default
-    private List<String> degrees = new ArrayList<>();
+    private Set<String> degrees = new HashSet<>();
 
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -56,7 +57,22 @@ public class Teacher extends BaseEntity {
 
     @ManyToMany(mappedBy = "teachers")
     @Builder.Default
-    private List<Coaching> coachings = new ArrayList<>();
+    private Set<Coaching> coachings = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(
+            name = "teacher_batches",
+            joinColumns = @JoinColumn(name = "teacher_id")
+    )
+    @Column(name = "batch")
+    @Builder.Default
+    private Set<String> batches = new HashSet<>();
+
+
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer experience = 0;
 
 
 

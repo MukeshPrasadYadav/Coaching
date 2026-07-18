@@ -19,4 +19,4 @@ jwt:
   security: myultralongjlarwjiofdsjwrfmsdmnknwlfdmnmnlwedrnflkn
 logging:
   level:
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: INFO

@@ -37,9 +37,9 @@ public class Batch extends BaseEntity {
     @JoinColumn(name = "coaching_id")
     private Coaching coaching;
 
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
+//   @ManyToOne(fetch = FetchType.LAZY)
+//   @JoinColumn(name = "teacher_id")
+//    private Teacher teacher;
 
    @Builder.Default
     private Integer totalStudents = 0;

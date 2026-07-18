@@ -6,6 +6,7 @@ import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,14 +15,14 @@ public record RegisterTeacherRequest(
         @NotNull(message = "Name is required.")
         String name,
         @NotNull(message = "Provide subject for teacher")
-        List<String> subjects,
+        HashSet<String> subjects,
         UUID coachingId,
         @NotNull(message = "Provide Contact number")
         String contactNumber,
         @NotNull(message = "Provide fees for teacher")
         BigDecimal fee,
         @NotNull(message = "Provide degree for teacher")
-        List<String> degrees,
+        HashSet<String> degrees,
 
         @NotNull(message = "Enter email.")
         String email,

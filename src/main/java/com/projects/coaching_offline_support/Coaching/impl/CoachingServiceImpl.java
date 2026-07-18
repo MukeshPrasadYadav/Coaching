@@ -88,7 +88,7 @@ public class CoachingServiceImpl implements CoachingService {
                 coaching.getStudents().size(),
                 coaching.getBatches().stream()
                         .map(batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
                         .collect(Collectors.toList()),coaching.getUser().getEmail());
 
         return Optional.of(response);
@@ -142,7 +142,7 @@ public class CoachingServiceImpl implements CoachingService {
                 coaching.getBatches().size(),coaching.getUser().getContactNumber(),
                 coaching.getStudents().size(),coaching.getBatches().stream().map(
                         batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
                 .collect(Collectors.toList()),coaching.getUser().getEmail());
 
 
@@ -176,7 +176,7 @@ public class CoachingServiceImpl implements CoachingService {
                 coaching.getBatches().size(),coaching.getUser().getContactNumber(),
                 coaching.getStudents().size(),coaching.getBatches().stream().map(
                         batch ->
-                                new BatchInfo(batch.getId(),batch.getName(),batch.getTeacher().getUser().getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
+                                new BatchInfo(batch.getId(),batch.getName(),batch.getTimings(),batch.getCoaching().getCoachingName(),batch.getStatus()))
                 .collect(Collectors.toList()),coaching.getUser().getEmail());
     }
 

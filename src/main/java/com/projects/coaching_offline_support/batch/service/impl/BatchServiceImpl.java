@@ -81,7 +81,7 @@ public class BatchServiceImpl implements BatchService {
                 .coaching(coaching)
                 .name(request.batchName())
                 .classRoom(request.classRoom())
-                .teacher(teacher)
+                //.teacher(teacher)
                 .timings(request.timings())
                 .totalStudents(request.getTotalStudentOrDefault())       // todo add dynamic student capacity in request
                 .build();
@@ -100,8 +100,8 @@ public class BatchServiceImpl implements BatchService {
                 .orElseThrow(() -> new ResourceNotFoundException("Batch not found"));
 
         return new BatchInfo(
-                batchId,batch.getName(),
-                batch.getTeacher().getUser().getName(), batch.getTimings(),
+                batchId,batch.getName()
+                , batch.getTimings(),
                 batch.getCoaching().getCoachingName(),batch.getStatus());
 
 
@@ -117,8 +117,7 @@ public class BatchServiceImpl implements BatchService {
         );
 
        return info.map(batch -> new BatchInfo(
-               batch.getId(),batch.getName(),
-               batch.getTeacher().getUser().getName(),batch.getTimings(),
+               batch.getId(),batch.getName(),batch.getTimings(),
                batch.getCoaching().getCoachingName(),batch.getStatus()
        ));
     }

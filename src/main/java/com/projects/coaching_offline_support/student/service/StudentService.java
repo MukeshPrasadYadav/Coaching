@@ -6,6 +6,8 @@ import com.projects.coaching_offline_support.student.dto.response.StudentRespons
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 public interface StudentService  {
@@ -13,4 +15,6 @@ public interface StudentService  {
 
 
     Page<StudentResponse> getStudents(StudentFilter filter, Pageable pageable);
+
+    ByteArrayInputStream exportStudents(StudentFilter filter) throws IOException;
 }
