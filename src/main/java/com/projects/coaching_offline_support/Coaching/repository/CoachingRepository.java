@@ -13,4 +13,6 @@ public interface CoachingRepository extends JpaRepository<Coaching, UUID> {
     boolean existsByCoachingName(String name);
 
     Coaching findByUser_Email(String email);
+
+    Coaching findByUserId(UUID id);
 }

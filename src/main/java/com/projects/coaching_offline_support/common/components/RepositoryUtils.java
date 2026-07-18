@@ -7,7 +7,7 @@ public final class RepositoryUtils {
 
     private RepositoryUtils() {}
 
-    public static <T, ID> T findOrThrow(JpaRepository<T, ID> repository, ID id, String entityName) {
+    public static <T, ID> T findOrThrowById(JpaRepository<T, ID> repository, ID id, String entityName) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(entityName + " not found with id: " + id));
     }

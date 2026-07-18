@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record BatchInfo(
         UUID id,
-        String batchName,
+
         String teacherName,
         Map<DaysOfWeek,Timing> timing,
         String coachingName,

@@ -84,4 +84,15 @@ public class GlobalExceptionHandler {
                 .build();
         return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(DegreeNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDegreeNotFoundException(BadRequestException ex){
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .message(ex.getMessage())
+                .timeStamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(ApiResponse.error(errorResponse),HttpStatus.METHOD_NOT_ALLOWED);
+    }
 }
