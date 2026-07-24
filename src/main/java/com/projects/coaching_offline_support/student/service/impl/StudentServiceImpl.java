@@ -1,6 +1,10 @@
 package com.projects.coaching_offline_support.student.service.impl;
 
 
+import com.projects.coaching_offline_support.audit.entity.Auditable;
+import com.projects.coaching_offline_support.audit.enums.ActionType;
+import com.projects.coaching_offline_support.audit.enums.LogType;
+import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.Service.impl.ExcelExportService;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.student.dto.request.AddStudent;
@@ -33,7 +37,13 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @Auditable(
+           logType = LogType.STUDENT,
+            actionType = ActionType.CREATED,
+             description = " #{#request.email} in  batch #{#request.batch} in class #{#request.class_std}"
+    )
     public StudentResponse addStudent(AddStudent request) {
+
         Student student = Student.builder()
                 .name(request.name())
                 .email(request.email())
@@ -61,6 +71,11 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
+    @Auditable(
+            logType = LogType.STUDENT,
+            actionType = ActionType.DOWNLOADED,
+            description = "Downloaded students list."
+    )
     @Override
     public ByteArrayInputStream exportStudents(StudentFilter filter) throws IOException {
 

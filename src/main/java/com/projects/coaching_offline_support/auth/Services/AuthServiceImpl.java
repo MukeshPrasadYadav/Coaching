@@ -1,11 +1,11 @@
 package com.projects.coaching_offline_support.auth.Services;
 
+import com.projects.coaching_offline_support.audit.entity.Auditable;
+import com.projects.coaching_offline_support.audit.enums.ActionType;
+import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.auth.dtos.*;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
-import com.projects.coaching_offline_support.common.Exceptions.UserAlreadyExistsException;
-import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
-import com.projects.coaching_offline_support.common.enums.Permission;
-import com.projects.coaching_offline_support.common.enums.Role;
+import com.projects.coaching_offline_support.common.Exceptions.DuplicateException;
 import com.projects.coaching_offline_support.common.utils.CookieUtils;
 import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
@@ -13,16 +13,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 
 @Service
@@ -32,16 +30,22 @@ public class AuthServiceImpl implements AuthService{
     private  final UserRepository userRepository;
     private final  JwtService jwtService;
     private  final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher publisher;
 
 
 
+    @Auditable(
+            logType = LogType.USER,
+            actionType = ActionType.CREATED,
+            description = "New #{#request.role} user signed up"
+    )
     @Transactional
     @Override
     public SignupResponse signUp(SignupRequest request) {
 
         Optional<User> user = userRepository.findByEmail(request.email());
 
-        if(user.isPresent()) throw  new UserAlreadyExistsException("User already exists.");
+        if(user.isPresent()) throw  new DuplicateException("User already exists.");
 
         User toBeSaved = User.builder()
                 .email(request.email())
@@ -52,11 +56,20 @@ public class AuthServiceImpl implements AuthService{
 
         userRepository.save(toBeSaved);
 
+//        publisher.publishEvent(
+//                 UserSignedUpEvent.fromEntity(toBeSaved)
+//        );
+
         return new SignupResponse(toBeSaved.getId(),toBeSaved.getName(),toBeSaved.getRole().toString());
     }
 
     @Override
     @Transactional
+    @Auditable(
+            logType = LogType.USER,
+            actionType = ActionType.LOGGED_IN,
+            description = "user #{#request.email} logged in."
+    )
     public SignInResponse signin(SignInReuest request) throws BadRequestException {
         User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
 
@@ -95,6 +108,11 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
+    @Auditable(
+            logType = LogType.USER,
+            actionType = ActionType.LOGGED_OUT,
+            description = "user #{CurrentUser.get().getId()} logged out."
+    )
     public void signOut(HttpServletRequest request, HttpServletResponse response) {
         CookieUtils.deleteCookie(response,"access_token");
         CookieUtils.deleteCookie(response,"refresh_token");

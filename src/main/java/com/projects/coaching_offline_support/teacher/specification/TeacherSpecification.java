@@ -1,8 +1,11 @@
 package com.projects.coaching_offline_support.teacher.specification;
 
+import com.projects.coaching_offline_support.Coaching.entity.Coaching;
+import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
 import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
+import com.projects.coaching_offline_support.teacher.entity.CoachingTeacher;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import com.projects.coaching_offline_support.user.User;
 import jakarta.persistence.criteria.Join;
@@ -18,12 +21,25 @@ public class TeacherSpecification {
 
         return ((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            // only admin can see multiple teachers
+
+            Join<Teacher, CoachingTeacher> coachingTeacherJoin = root.join("coachingLinks");
+            Join<CoachingTeacher, Coaching> coachingJoin = coachingTeacherJoin.join("coaching");
+            Join<Coaching, User> userJoin = coachingJoin.join("user");
+
+            predicates.add(
+                    cb.equal(
+                            userJoin.get("id"),
+                            CurrentUser.get().getId()
+                    )
+            );
+
             // search
             if (filter.search() != null && !filter.search().isBlank()) {
 
                 String keyword = "%" + filter.search().toLowerCase() + "%";
 
-                Join<Teacher, User> userJoin = root.join("user");
+
 
                 predicates.add(
                         cb.like(

@@ -13,7 +13,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,8 +50,11 @@ public class TeacherController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TeacherResponse>>> getTeachers(
             TeacherFilter filter,
-            Pageable pageable
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int  pageSize,
+            @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC) Sort sort
     ) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<TeacherResponse> result = teacherService.getTeachers(filter,pageable);
         return ResponseEntity.ok(ApiResponse.success(result,"Fetched students successfully"));
     }

@@ -10,12 +10,12 @@ import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
+import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 
 @Entity
 @Getter
@@ -37,17 +37,11 @@ public class Batch extends BaseEntity {
     @JoinColumn(name = "coaching_id")
     private Coaching coaching;
 
-//   @ManyToOne(fetch = FetchType.LAZY)
-//   @JoinColumn(name = "teacher_id")
-//    private Teacher teacher;
-
    @Builder.Default
     private Integer totalStudents = 0;
 
-   @ElementCollection
-   @CollectionTable(name = "teacher_availability")
-   @MapKeyEnumerated(EnumType.STRING)
-   private Map<DaysOfWeek, Timing> timings = new EnumMap<>(DaysOfWeek.class);
+   @OneToMany(mappedBy = "batch" , cascade = CascadeType.ALL)
+   private List<BatchSchedule> schedules = new ArrayList<>();
 
    @Column(nullable = false)
     private BigDecimal fees;
@@ -59,5 +53,12 @@ public class Batch extends BaseEntity {
    
     private  String classRoom;
 
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
     private String reasonToClose;
+
+    @Builder.Default
+    private boolean active = true;
 }
