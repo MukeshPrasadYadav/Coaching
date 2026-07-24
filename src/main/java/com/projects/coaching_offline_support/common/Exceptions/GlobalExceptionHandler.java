@@ -3,7 +3,6 @@ package com.projects.coaching_offline_support.common.Exceptions;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.common.dtos.ErrorResponse;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +16,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistException(UserAlreadyExistsException ex){
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistException(DuplicateException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .status(HttpStatus.CONFLICT)

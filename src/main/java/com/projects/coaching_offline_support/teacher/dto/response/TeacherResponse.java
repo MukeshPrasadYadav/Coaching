@@ -13,7 +13,6 @@ public record TeacherResponse(
         UUID id,
         String name,
         Integer experience,
-        Set<String> batches,
         Set<String> degrees,
         Set<String> subjects,
         BigDecimal fee) {
@@ -23,7 +22,6 @@ public record TeacherResponse(
                 teacher.getId(),
                 teacher.getUser().getName(),
                 teacher.getExperience(),
-                teacher.getBatches(),
                 teacher.getDegrees(),
                 teacher.getSubjects(),
                 teacher.getFee()

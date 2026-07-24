@@ -30,11 +30,10 @@ public class CoachingController {
         return ResponseEntity.ok(ApiResponse.success(response,"Added coaching successfully."));
     }
 
-    @GetMapping("/{coachingId}")
-    public ResponseEntity<ApiResponse<Optional<CoachingResponse>>> getCoachingById(@PathVariable UUID coachingId){
+    @GetMapping
+    public ResponseEntity<ApiResponse<CoachingResponse>> getCoaching(){
 
-        Optional<CoachingResponse>  response = coachingService.getCoachingById(coachingId);
-        return ResponseEntity.ok(ApiResponse.success(response,"Fetched coaching successfully."));
+        return ResponseEntity.ok(ApiResponse.success(coachingService.getCoaching(),"Fetched coaching successfully."));
     }
 
     @PostMapping("/{coachingId}")
@@ -43,11 +42,7 @@ public class CoachingController {
         return ResponseEntity.ok(ApiResponse.success("Coaching closed successfully."));
     }
 
-    @PatchMapping("/{coachingId}/appoint/teacher")
-    public ResponseEntity<ApiResponse<Void>> appointTeacher( @PathVariable UUID coachingId,@RequestBody UUID teacherId){
-        coachingService.addTeacher(coachingId,teacherId);
-        return ResponseEntity.ok(ApiResponse.success("Added teacher successfully"));
-    }
+
 
     @PatchMapping("/{coachingId}/updateAddress")
     public ResponseEntity<ApiResponse<CoachingResponse>> updateAddress(@PathVariable UUID coachingId, @RequestBody Address address){

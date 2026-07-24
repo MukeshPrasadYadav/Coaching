@@ -2,22 +2,24 @@ package com.projects.coaching_offline_support.teacher.service.impl;
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
-import com.projects.coaching_offline_support.batch.entity.Batch;
+import com.projects.coaching_offline_support.audit.entity.Auditable;
+import com.projects.coaching_offline_support.audit.enums.ActionType;
+import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.common.Exceptions.DegreeNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.Service.impl.ExcelExportService;
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
-import com.projects.coaching_offline_support.common.entity.Address;
+import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.common.enums.Role;
-import com.projects.coaching_offline_support.student.entity.Student;
-import com.projects.coaching_offline_support.student.specification.StudentSpecification;
 import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
 import com.projects.coaching_offline_support.teacher.dto.request.RegisterTeacherRequest;
 import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
+import com.projects.coaching_offline_support.teacher.entity.CoachingTeacher;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
+import com.projects.coaching_offline_support.teacher.repository.CoachingTeacherRepository;
 import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
 import com.projects.coaching_offline_support.teacher.service.TeacherService;
 import com.projects.coaching_offline_support.teacher.specification.TeacherSpecification;
@@ -35,8 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.security.Principal;
+import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -48,16 +51,23 @@ public class TeacherServiceImpl implements TeacherService {
     private  final PasswordEncoder passwordEncoder;
     private final CoachingRepository coachingRepository;
     private final ExcelExportService excelExportService;
+    private final CoachingTeacherRepository coachingTeacherRepository;
+
+
+    private static final LocalTime DEFAULT_START = LocalTime.of(9, 0);
+    private static final LocalTime DEFAULT_END = LocalTime.of(21, 0);
 
     @Override
     @Transactional
     public TeacherResponse add(RegisterTeacherRequest request) {
-        User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException("No user found."));
+        User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException("No user found with email"+request.email()));
 
         user.setContactNumber(request.contactNumber());
         user.setProfileCompleted(true);
         user.setAddress(request.address());
       User savedUser =  userRepository.save(user);
+
+
 
         Teacher teacher = Teacher.builder()
                 .fee(request.fee())
@@ -72,9 +82,9 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TeacherResponse getTeacherById(UUID teacherId) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found."));
+        Teacher teacher = RepositoryUtils.findOrThrowById(teacherRepository,teacherId,"Teacher");
 
         return TeacherResponse.fromEntity(teacher);
     }
@@ -82,6 +92,11 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
+    @Auditable(
+            logType = LogType.TEACHER,
+            actionType = ActionType.CREATED,
+            description = "Added teacher with mail #{#request.email} and name #{#request.name}"
+    )
     public TeacherCoachingResponse addTeacherToCoaching(AddTeacherRequest request) {
         Coaching coaching = coachingRepository.findByUserId(CurrentUser.get().getId());
         if(coaching == null) throw  new ResourceNotFoundException("No coaching found.");
@@ -110,18 +125,18 @@ public class TeacherServiceImpl implements TeacherService {
                     .user(savedUser)
                     .degrees(request.degrees())
                     .subjects(request.subjects())
-                    .coachings(new HashSet<>(Set.of(coaching)))
                     .experience(request.experience())
-                    .batches(request.batches())
                     .fee(BigDecimal.valueOf(500.00)) // remove hard coded value of fee
                   //  .batches(List.of(request.batches())) TODO add batch api then get batch from here becuase request batch contains string currently but need Batch
                     .build();
+
+            Teacher finalTeacher = teacher;
             teacherRepository.save(teacher);
 
         }else{
 
 
-            teacher.getCoachings().add(coaching);
+
             teacher.getSubjects().addAll(request.subjects());
             teacher.getDegrees().addAll(request.degrees());
             teacher.setFee(BigDecimal.valueOf(500));
@@ -131,19 +146,21 @@ public class TeacherServiceImpl implements TeacherService {
             teacherRepository.save(teacher);
 
         }
+        CoachingTeacher coachingTeacher = CoachingTeacher.builder()
+                .coaching(coaching)
+                .teacher(teacher)
+                .build();
 
-        return new TeacherCoachingResponse(
-                teacher.getUser().getName(),
-                teacher.getUser().getContactNumber(),
-                teacher.getDegrees(),
-                teacher.getSubjects(),
-                teacher.getBatches()
-
-        );
+        coachingTeacherRepository.save(coachingTeacher);
+        coachingTeacherRepository.save(coachingTeacher);
+        return TeacherCoachingResponse.fromEntity(teacher);
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<TeacherResponse> getTeachers(TeacherFilter filter, Pageable pageable) {
+
+
         return  teacherRepository.findAll(
                 TeacherSpecification.filter(filter),
                 pageable
@@ -151,6 +168,13 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    @Auditable(
+            logType = LogType.STUDENT,
+            actionType = ActionType.DOWNLOADED,
+            description = "Downloaded teachers list."
+    )
     public ByteArrayInputStream exportTeachers(TeacherFilter filter) throws IOException {
         Coaching coaching = coachingRepository.findByUserId(CurrentUser.get().getId());
         if(coaching == null) throw new ResourceNotFoundException("No coaching found");
@@ -179,7 +203,6 @@ public class TeacherServiceImpl implements TeacherService {
                         teacher.getUser().getEmail(),
                         teacher.getDegrees(),
                         teacher.getSubjects(),
-                        teacher.getBatches(),
                         teacher.getExperience()
                      //   coaching.getTeachers().equals(teacher) TODO add logic for getting joining date
                 )

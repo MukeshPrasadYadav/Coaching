@@ -2,10 +2,7 @@ package com.projects.coaching_offline_support.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalTime;
 
@@ -14,6 +11,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @Embeddable
+@Builder
 public class Timing {
 
     @Column(nullable = false)

@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.teacher.entity;
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.batch.entity.Batch;
+import com.projects.coaching_offline_support.batch.entity.BatchSchedule;
 import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.common.entity.Timing;
@@ -12,7 +13,9 @@ import lombok.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -55,35 +58,21 @@ public class Teacher extends BaseEntity {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal fee;
 
-    @ManyToMany(mappedBy = "teachers")
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<Coaching> coachings = new HashSet<>();
+    private List<CoachingTeacher> coachingLinks = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(
             name = "teacher_batches",
             joinColumns = @JoinColumn(name = "teacher_id")
     )
-    @Column(name = "batch")
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<String> batches = new HashSet<>();
-
-
+    private List<BatchSchedule> schedules = new ArrayList<>();
 
     @Column(nullable = false)
     @Builder.Default
     private Integer experience = 0;
 
-
-
-
-    public void addCoaching(Coaching coaching) {
-        coachings.add(coaching);
-        coaching.getTeachers().add(this);
-    }
-
-    public void removeCoaching(Coaching coaching) {
-        coachings.remove(coaching);
-        coaching.getTeachers().remove(this);
-    }
 }

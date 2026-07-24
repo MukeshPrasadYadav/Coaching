@@ -11,12 +11,11 @@ import java.util.UUID;
 public interface CoachingService {
 
     AddCoachingResponse add(@Valid AddCoachingRequest request);
-
-   Optional<CoachingResponse> getCoachingById(UUID coachingId);
+    CoachingResponse getCoaching();
 
     void remove(UUID coachingId, @Valid RemoveCoachingRequest request);
 
-    void addTeacher(UUID teacherId,UUID coachingId);
+
 
     CoachingResponse updateAddress(UUID coachingID, Address address);
 
