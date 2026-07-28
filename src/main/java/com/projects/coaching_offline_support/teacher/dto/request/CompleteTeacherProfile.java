@@ -1,17 +1,15 @@
 package com.projects.coaching_offline_support.teacher.dto.request;
 
 import com.projects.coaching_offline_support.common.entity.Address;
-import com.projects.coaching_offline_support.common.entity.Timing;
-import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
+import com.projects.coaching_offline_support.common.enums.Gender;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-public record RegisterTeacherRequest(
+public record CompleteTeacherProfile(
         @NotNull(message = "Name is required.")
         String name,
         @NotNull(message = "Provide subject for teacher")
@@ -28,6 +26,12 @@ public record RegisterTeacherRequest(
         String email,
 
         @NotNull(message = "provide address.")
-        Address address
+        Address address,
+
+        @NotNull
+        LocalDate dob,
+
+        @NotNull
+        Gender gender
 ) {
 }

@@ -15,10 +15,7 @@ import com.projects.coaching_offline_support.common.components.RepositoryUtils;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.student.dto.response.StudentBatchResponse;
-import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
-import com.projects.coaching_offline_support.teacher.dto.request.AppointTeacherFilter;
-import com.projects.coaching_offline_support.teacher.dto.request.RegisterTeacherRequest;
-import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
+import com.projects.coaching_offline_support.teacher.dto.request.*;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
 import com.projects.coaching_offline_support.teacher.entity.CoachingTeacher;
@@ -32,6 +29,7 @@ import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.impl.store.Cur;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -66,22 +64,28 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     @Transactional
-    public TeacherResponse add(RegisterTeacherRequest request) {
-        User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException("No user found with email"+request.email()));
+    @Auditable(
+            logType = LogType.TEACHER,
+            actionType = ActionType.PROFILE_COMPLETED,
+            description = "Teacher #{#request.email} completed profile."
+    )
+    public TeacherResponse completeProfile(CompleteTeacherProfile request) {
+        User user = RepositoryUtils.findOrThrowById(userRepository,CurrentUser.get().getId(), "User");
 
         user.setContactNumber(request.contactNumber());
         user.setProfileCompleted(true);
         user.setAddress(request.address());
+        user.setDob(request.dob());
+        user.setGender(request.gender());
+        // Todo set profile picture
       User savedUser =  userRepository.save(user);
 
+      Teacher teacher = RepositoryUtils.findOrThrowById(teacherRepository,CurrentUser.get().getId(), "Teacher");
 
-
-        Teacher teacher = Teacher.builder()
-                .fee(request.fee())
-                .degrees(request.degrees())
-                .subjects(request.subjects())
-                .user(savedUser)
-                .build();
+      teacher.setFee(request.fee());
+      teacher.setDegrees(request.degrees());
+      teacher.setSubjects(request.subjects());
+      teacher.setUser(savedUser);
 
         teacherRepository.save(teacher);
 

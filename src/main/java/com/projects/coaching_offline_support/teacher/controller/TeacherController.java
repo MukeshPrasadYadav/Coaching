@@ -3,10 +3,7 @@ package com.projects.coaching_offline_support.teacher.controller;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
 
-import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
-import com.projects.coaching_offline_support.teacher.dto.request.AppointTeacherFilter;
-import com.projects.coaching_offline_support.teacher.dto.request.RegisterTeacherRequest;
-import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
+import com.projects.coaching_offline_support.teacher.dto.request.*;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
 import com.projects.coaching_offline_support.teacher.service.TeacherService;
@@ -36,14 +33,14 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     // Todo teacher add is dublicate add validation for adding teacher
-    @PostMapping
-    public ResponseEntity<ApiResponse<TeacherResponse>> addTeacher(@Valid @RequestBody RegisterTeacherRequest request){
+    @PostMapping("/completeProfile")
+    public ResponseEntity<ApiResponse<TeacherResponse>> completeProfile(@Valid @RequestBody CompleteTeacherProfile request){
 
 
-        return ResponseEntity.ok(ApiResponse.success(teacherService.add(request),"Added teacher successfully."));
+        return ResponseEntity.ok(ApiResponse.success(teacherService.completeProfile(request),"Added teacher successfully."));
     }
 
-    @PostMapping("/addTeacher")
+    @PostMapping
     public ResponseEntity<ApiResponse<TeacherCoachingResponse>> addTeacher(@Valid @RequestBody AddTeacherRequest request){
 
         return ResponseEntity.ok(ApiResponse.success(teacherService.addTeacherToCoaching(request),"Teacher added successfully"));

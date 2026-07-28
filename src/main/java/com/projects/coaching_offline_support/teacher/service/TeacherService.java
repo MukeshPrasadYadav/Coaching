@@ -1,9 +1,6 @@
 package com.projects.coaching_offline_support.teacher.service;
 
-import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
-import com.projects.coaching_offline_support.teacher.dto.request.AppointTeacherFilter;
-import com.projects.coaching_offline_support.teacher.dto.request.RegisterTeacherRequest;
-import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
+import com.projects.coaching_offline_support.teacher.dto.request.*;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
 import jakarta.validation.Valid;
@@ -16,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TeacherService {
-    TeacherResponse add(@Valid RegisterTeacherRequest request);
+    TeacherResponse completeProfile(@Valid CompleteTeacherProfile request);
 
     TeacherResponse getTeacherById(UUID teacherId);
 
