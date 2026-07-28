@@ -3,8 +3,9 @@ package com.projects.coaching_offline_support.student.controller;
 
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.student.dto.request.AddStudent;
+import com.projects.coaching_offline_support.student.dto.request.CompleteStudentProfileRequest;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
-import com.projects.coaching_offline_support.student.dto.response.StudentResponse;
+import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
 
 import com.projects.coaching_offline_support.student.service.StudentService;
 import jakarta.annotation.Resource;
@@ -32,13 +33,13 @@ public class StudentController {
     private final StudentService studentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<StudentResponse>> addStudent(@Valid @RequestBody AddStudent request){
+    public ResponseEntity<ApiResponse<StudentCoachingResponse>> addStudent(@Valid @RequestBody AddStudent request){
 
         return ResponseEntity.ok(ApiResponse.success(studentService.addStudent(request),"Student added successfully"));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<StudentResponse>>> getStudents(
+    public ResponseEntity<ApiResponse<Page<StudentCoachingResponse>>> getStudents(
             StudentFilter filter,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int  pageSize,
@@ -46,7 +47,7 @@ public class StudentController {
     ) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<StudentResponse> result = studentService.getStudents(filter,pageable);
+        Page<StudentCoachingResponse> result = studentService.getStudents(filter,pageable);
         return ResponseEntity.ok(ApiResponse.success(result,"Fetched students successfully"));
     }
 
@@ -63,4 +64,9 @@ public class StudentController {
                 .body(new InputStreamResource(inputStream));
     }
 
+    @PostMapping("/completeProfile")
+    public ResponseEntity<ApiResponse<Void>> completeProfile(@Valid @RequestBody CompleteStudentProfileRequest request){
+        studentService.completeProfile(request);
+        return ResponseEntity.ok(ApiResponse.success("Profile completed successfully"));
+    }
 }

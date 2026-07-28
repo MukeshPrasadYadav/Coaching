@@ -26,6 +26,7 @@ public class TeacherSpecification {
             Join<Teacher, CoachingTeacher> coachingTeacherJoin = root.join("coachingLinks");
             Join<CoachingTeacher, Coaching> coachingJoin = coachingTeacherJoin.join("coaching");
             Join<Coaching, User> userJoin = coachingJoin.join("user");
+            Join<Teacher, User> teacherUserJoin = root.join("user");
 
             predicates.add(
                     cb.equal(
@@ -43,7 +44,7 @@ public class TeacherSpecification {
 
                 predicates.add(
                         cb.like(
-                                cb.lower(userJoin.get("name")),
+                                cb.lower(teacherUserJoin.get("name")),
                                 keyword
                         )
                 );

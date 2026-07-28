@@ -7,6 +7,7 @@ import com.projects.coaching_offline_support.batch.enums.BatchStatus;
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.common.entity.Timing;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
+import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,18 +41,32 @@ public class Batch extends BaseEntity {
    @Builder.Default
     private Integer totalStudents = 0;
 
-   @OneToMany(mappedBy = "batch" , cascade = CascadeType.ALL)
-   private List<BatchSchedule> schedules = new ArrayList<>();
+   private Integer totalCapacity ;
+
+    @OneToMany(
+            mappedBy = "batch",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<BatchSchedule> schedules = new ArrayList<>();
 
    @Column(nullable = false)
-    private BigDecimal fees;
+    private BigDecimal fee;
 
    @Column(nullable = false)
-   @Enumerated
+   @Enumerated(EnumType.STRING)
    @Builder.Default
     private BatchStatus status = BatchStatus.TO_BE_LAUNCHED;
+
+   @Column(nullable = false)
+   private List<String> subjects;  // this will be later in batachSchedule
    
     private  String classRoom;
+
+    @ManyToMany(mappedBy = "batches")
+    private List<Student> students = new ArrayList<>();
+
 
     private LocalDate startDate;
 

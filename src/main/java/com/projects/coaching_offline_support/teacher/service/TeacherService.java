@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.teacher.service;
 
 import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
+import com.projects.coaching_offline_support.teacher.dto.request.AppointTeacherFilter;
 import com.projects.coaching_offline_support.teacher.dto.request.RegisterTeacherRequest;
 import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 public interface TeacherService {
@@ -23,4 +25,8 @@ public interface TeacherService {
     Page<TeacherResponse> getTeachers(TeacherFilter filter, Pageable pageable);
 
     ByteArrayInputStream exportTeachers(TeacherFilter filter) throws IOException;
+
+    Page<TeacherResponse> appointTeacher(AppointTeacherFilter filter, Pageable pageable);
+
+    List<TeacherResponse> getTeacherByCoachingId(UUID coachingId);
 }

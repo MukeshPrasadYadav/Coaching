@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.user;
 
 import com.projects.coaching_offline_support.common.entity.Address;
+import com.projects.coaching_offline_support.common.enums.Gender;
 import com.projects.coaching_offline_support.common.enums.Permission;
 import com.projects.coaching_offline_support.common.enums.Role;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -49,6 +51,15 @@ public class User implements UserDetails {
     @Embedded
     @Builder.Default
     private Address address = new Address();
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+
+    private LocalDate dob;
+
+    @Column(name = "profilePic")
+    private String profilePic;
 
 
 

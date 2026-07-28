@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService{
     @Auditable(
             logType = LogType.USER,
             actionType = ActionType.CREATED,
-            description = "New #{#request.role} user signed up"
+            description = "New #{#request.role} with email : #{#request.email} user signed up"
     )
     @Transactional
     @Override

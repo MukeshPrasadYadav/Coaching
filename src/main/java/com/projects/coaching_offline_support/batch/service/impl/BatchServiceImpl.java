@@ -3,6 +3,9 @@ package com.projects.coaching_offline_support.batch.service.impl;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
+import com.projects.coaching_offline_support.audit.entity.Auditable;
+import com.projects.coaching_offline_support.audit.enums.ActionType;
+import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.batch.dto.request.AddBatchRequest;
 import com.projects.coaching_offline_support.batch.dto.request.BatchFilter;
 import com.projects.coaching_offline_support.batch.dto.response.BatchConflictResponse;
@@ -17,9 +20,13 @@ import com.projects.coaching_offline_support.common.Exceptions.BatchTimingConfli
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.DuplicateException;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
+import com.projects.coaching_offline_support.common.Service.impl.ExcelExportService;
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
 import com.projects.coaching_offline_support.common.entity.Timing;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
+import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
+import com.projects.coaching_offline_support.student.entity.Student;
+import com.projects.coaching_offline_support.student.specification.StudentSpecification;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
 import jakarta.transaction.Transactional;
@@ -32,6 +39,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -49,37 +59,70 @@ public class BatchServiceImpl implements BatchService {
     private final CoachingRepository coachingRepository;
     private final TeacherRepository teacherRepository;
     private final BatchScheduleRepository scheduleRepository;
+    private final BatchScheduleRepository batchScheduleRepository;
+    private final ExcelExportService excelExportService;
 
-    public boolean isTeacherAvailable(UUID teacherId, DaysOfWeek day,
-                                      LocalTime start, LocalTime end) {
-        List<BatchSchedule> existing = scheduleRepository.findByTeacherAndDay(teacherId, day);
-
-        return existing.stream().noneMatch(s ->
-                start.isBefore(s.getTiming().getEndTime()) && s.getTiming().getStartTime().isBefore(end)
-        );
-    }
+//    public boolean isTeacherAvailable(UUID teacherId, DaysOfWeek day,
+//                                      LocalTime start, LocalTime end) {
+//        List<BatchSchedule> existing = scheduleRepository.findByTeacherAndDay(teacherId, day);
+//
+//        return existing.stream().noneMatch(s ->
+//                start.isBefore(s.getTiming().getEndTime()) && s.getTiming().getStartTime().isBefore(end)
+//        );
+//    }
 
 
     @Transactional
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public void addBatch(AddBatchRequest request) {
-        UUID userId = CurrentUser.detail().id();
-        if(userId == null) throw new ResourceNotFoundException("No user found");
+    @Auditable(
+            logType = LogType.BATCH,
+            actionType = ActionType.CREATED,
+            description = "Batch added by #{#coachingId}"
+    )
+    public void addBatch(UUID coachingId,AddBatchRequest request) {
 
-        Coaching coaching = coachingRepository.findByUserId(userId);
-        if(coaching == null) throw new ResourceNotFoundException("No coaching found");
+
+        Coaching coaching = RepositoryUtils.findOrThrowById(coachingRepository,coachingId,"Coaching");
+
+        List<Teacher> teachers = teacherRepository.findByCoachingId(coachingId)
+                .stream()
+                .filter(teacher ->
+                        request.teachers().contains(teacher.getId())
+                )
+                .toList();
+
 
         Batch batch = Batch.builder()
-                .name(request.batchName())
+                .name(request.name())
                 .coaching(coaching)
-                .totalStudents(request.getTotalStudentOrDefault())
-                .fees(request.fees())
-                .startDate(request.startingDate())
-                .endDate(request.endingDate())
+                .totalCapacity(request.getTotalStudentCapacityOrDefault())
+                .fee(request.fee())
+                .startDate(request.startDate())
+                .endDate(request.endDate())
+                .subjects(request.subjects())
                 .build();
         batchRepository.save(batch);
 
+        coaching.getBatches().add(batch);
+        coachingRepository.save(coaching);
+
+        for (Teacher teacher : teachers) {
+
+            BatchSchedule schedule = BatchSchedule.builder()
+                    .batch(batch)
+                    .teacher(teacher)
+                    .timing(Timing.builder()
+                            .startTime(request.startTime())
+                            .endTime(request.endTime())
+                            .build())
+                    .build();
+
+            batch.getSchedules().add(schedule);
+            teacher.getSchedules().add(schedule);
+
+            batchScheduleRepository.save(schedule);
+        }
 
 
 
@@ -95,18 +138,73 @@ public class BatchServiceImpl implements BatchService {
     }
 
     @Override
-    public Page<BatchInfo> getBatch(BatchFilter filter,int page,int size) {
+    public Page<BatchInfo> getBatch(BatchFilter filter,Pageable pageable) {
 
         Sort sort = Sort.by(Sort.Order.desc("createdAt"));
-        Pageable pagable = PageRequest.of(page,size,sort);
+
         Page<Batch> info = batchRepository.findAll(
-                BatchSpecification.filter(filter),pagable
+                BatchSpecification.filter(filter),pageable
         );
 
        return info.map(BatchInfo::fromEntity);
     }
 
+    @Auditable(
+            logType = LogType.BATCH,
+            actionType = ActionType.DOWNLOADED,
+            description = "Downloaded batch list."
+    )
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public ByteArrayInputStream exportBatches(BatchFilter filter) throws IOException {
 
+        List<Batch> batches = batchRepository.findAll(BatchSpecification.filter(filter));
+
+        List<String> headers = List.of(
+                "Batch Id",
+                "Name",
+                "Total student",
+                "Total teacher",
+                "Fee",
+                "Total Fee collection",
+                "Teachers",
+                "Start time",
+                "End time",
+                "Start Date",
+                "End Date",
+                "Subjects"
+        );
+
+        return excelExportService.export(
+                "batches",
+                headers,
+                batches,
+                batch -> List.of(
+                        batch.getId(),
+                        batch.getName(),
+                        batch.getStudents().size(),
+                        batch.getSchedules().size() , // to be changed with total teachers
+                        batch.getFee(),
+                        batch.getFee().multiply(BigDecimal.valueOf(batch.getStudents().size())),                        batch.isActive() ,  // to be replaced by teachers
+                        batch.getSchedules().getFirst().getTiming().getStartTime(),
+                        batch.getSchedules().getFirst().getTiming().getEndTime(),
+                        batch.getStartDate(),
+                        batch.getEndDate(),
+                        batch.getSubjects()
+                )
+        );
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<BatchInfo> getBatches() {
+
+       List<Batch> batches = batchRepository.findByCoaching_Id(CurrentUser.get().getId());
+       return batches.stream().map(
+               BatchInfo::fromEntity
+       ).toList();
+    }
 
 
 }
