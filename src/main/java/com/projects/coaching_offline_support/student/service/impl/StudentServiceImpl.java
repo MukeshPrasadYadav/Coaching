@@ -63,7 +63,6 @@ public class StudentServiceImpl implements StudentService {
                 .name(request.name())
                 .email(request.email())
                 .contactNumber(request.contactNumber())
-                .address(request.address())
                 .hashedPassword(passwordEncoder.encode("Default_password"))
                 .role(Role.STUDENT)
                 .build();
@@ -73,9 +72,6 @@ public class StudentServiceImpl implements StudentService {
 
         Student student = Student.builder()
                 .user(user)
-                .parentNumber(request.parentNumber())
-                .parentEmail(request.parentEmail())
-                .parentName(request.parentName())
                 .build();
         
 
@@ -149,7 +145,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void completeProfile(CompleteStudentProfileRequest request) {
 
-        User user = RepositoryUtils.findOrThrowById(userRepository,CurrentUser.get().getId(), "Student");
+        User user = RepositoryUtils.findOrThrowById(userRepository,CurrentUser.get().getId(), "User");
 
 
         user.setContactNumber(request.contactNumber());
@@ -162,13 +158,16 @@ public class StudentServiceImpl implements StudentService {
         user.setAddress(request.address());
         User savedUser =  userRepository.save(user);
 
-        Student student = Student.builder()
-                .fatherName(request.fatherName())
-                .motherName(request.motherName())
-                .parentName(request.guardianName())
-                .parentNumber(request.parentNumber())
-                .parentEmail(request.parentEmail())
-                .build();
+        Student student = RepositoryUtils.findOrThrowById(studentRepository,CurrentUser.get().getId(), "Student");
+
+        student.setFatherName(request.fatherName());
+        student.setMotherName(request.motherName());
+        student.setParentName(request.guardianName());
+        student.setParentNumber(request.parentNumber());
+        student.setParentEmail(request.parentEmail());
+
+
+        studentRepository.save(student);
 
     }
 
