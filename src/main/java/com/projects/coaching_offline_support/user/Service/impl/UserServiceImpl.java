@@ -3,6 +3,9 @@ package com.projects.coaching_offline_support.user.Service.impl;
 
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
+import com.projects.coaching_offline_support.audit.entity.Auditable;
+import com.projects.coaching_offline_support.audit.enums.ActionType;
+import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
@@ -28,6 +31,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Auditable(
+            logType = LogType.USER,
+            actionType = ActionType.PROFILE_COMPLETED,
+            description = "user #{#request.email} has completed profile."
+    )
     public void updateUser(UUID userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No user found."));
         if(! user.getName().equals(request.name())){

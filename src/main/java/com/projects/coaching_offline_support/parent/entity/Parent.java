@@ -3,6 +3,7 @@ package com.projects.coaching_offline_support.parent.entity;
 
 import com.projects.coaching_offline_support.common.entity.BaseEntity;
 import com.projects.coaching_offline_support.student.entity.Student;
+import com.projects.coaching_offline_support.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +19,13 @@ import java.util.UUID;
 @Builder
 public class Parent extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @MapsId
+    private User user;
+
 
     @OneToMany
     @JoinColumn(name = "parent_id")

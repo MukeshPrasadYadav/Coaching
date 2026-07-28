@@ -5,6 +5,8 @@ import com.projects.coaching_offline_support.Coaching.repository.CoachingReposit
 import com.projects.coaching_offline_support.audit.entity.Auditable;
 import com.projects.coaching_offline_support.audit.enums.ActionType;
 import com.projects.coaching_offline_support.audit.enums.LogType;
+import com.projects.coaching_offline_support.batch.entity.Batch;
+import com.projects.coaching_offline_support.batch.entity.BatchSchedule;
 import com.projects.coaching_offline_support.common.Exceptions.DegreeNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
@@ -12,7 +14,9 @@ import com.projects.coaching_offline_support.common.Service.impl.ExcelExportServ
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
 import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.common.enums.Role;
+import com.projects.coaching_offline_support.student.dto.response.StudentBatchResponse;
 import com.projects.coaching_offline_support.teacher.dto.request.AddTeacherRequest;
+import com.projects.coaching_offline_support.teacher.dto.request.AppointTeacherFilter;
 import com.projects.coaching_offline_support.teacher.dto.request.RegisterTeacherRequest;
 import com.projects.coaching_offline_support.teacher.dto.request.TeacherFilter;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
@@ -22,6 +26,7 @@ import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import com.projects.coaching_offline_support.teacher.repository.CoachingTeacherRepository;
 import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
 import com.projects.coaching_offline_support.teacher.service.TeacherService;
+import com.projects.coaching_offline_support.teacher.specification.AppointTeacherSpecification;
 import com.projects.coaching_offline_support.teacher.specification.TeacherSpecification;
 import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
@@ -40,6 +45,8 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
 @Service
@@ -158,6 +165,7 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
     public Page<TeacherResponse> getTeachers(TeacherFilter filter, Pageable pageable) {
 
 
@@ -171,7 +179,7 @@ public class TeacherServiceImpl implements TeacherService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     @Auditable(
-            logType = LogType.STUDENT,
+            logType = LogType.TEACHER,
             actionType = ActionType.DOWNLOADED,
             description = "Downloaded teachers list."
     )
@@ -179,6 +187,7 @@ public class TeacherServiceImpl implements TeacherService {
         Coaching coaching = coachingRepository.findByUserId(CurrentUser.get().getId());
         if(coaching == null) throw new ResourceNotFoundException("No coaching found");
         List<Teacher> teachers = teacherRepository.findAll(TeacherSpecification.filter(filter));
+
 
         List<String> headers = List.of(
                 "Teacher Id",
@@ -203,10 +212,34 @@ public class TeacherServiceImpl implements TeacherService {
                         teacher.getUser().getEmail(),
                         teacher.getDegrees(),
                         teacher.getSubjects(),
+                        teacher.getSchedules()
+                                .stream()
+                                .map(BatchSchedule::getBatch)
+                                .distinct()
+                                .map(Batch::getName)
+                                .collect(Collectors.joining(", ")),
                         teacher.getExperience()
-                     //   coaching.getTeachers().equals(teacher) TODO add logic for getting joining date
                 )
         );
+    }
+
+    @Override
+    public Page<TeacherResponse> appointTeacher(AppointTeacherFilter filter, Pageable pageable) {
+        return  teacherRepository.findAll(
+                AppointTeacherSpecification.filter(filter),
+                pageable
+        ).map(TeacherResponse::fromEntity);
+    }
+
+    @Override
+    public List<TeacherResponse> getTeacherByCoachingId(UUID coachingId) {
+        RepositoryUtils.findOrThrowById(coachingRepository,coachingId,"coaching");
+       List<Teacher> teachers = teacherRepository.findByCoachingId(coachingId);
+
+       return teachers.stream().map(
+               TeacherResponse::fromEntity
+       ).toList();
+
     }
 
 

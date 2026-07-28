@@ -6,6 +6,7 @@ import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
 import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.entity.Address;
 import com.projects.coaching_offline_support.common.entity.UserInfo;
+import com.projects.coaching_offline_support.student.entity.Student;
 import lombok.Builder;
 
 import java.util.List;
@@ -28,12 +29,15 @@ public record CoachingResponse(
 
     public static CoachingResponse fromEntity(Coaching coaching){
         List<BatchInfo> batches = coaching.getBatches().stream()
-                .map(batch ->
-                        new BatchInfo(
-                                batch.getId(),batch.getName(),
-                                batch.getStatus()))
+                .map(BatchInfo::fromEntity)
                 .collect(Collectors.toList());
 
+        int totalStudents = (int) coaching.getBatches()
+                .stream()
+                .flatMap(batch -> batch.getStudents().stream())
+                .map(Student::getId)
+                .distinct()
+                .count();
 
 
         return new CoachingResponse(
@@ -43,7 +47,7 @@ public record CoachingResponse(
                 coaching.getUser().getContactNumber(),
                 coaching.getUser().getAddress(),
                 coaching.getBatches().size(),
-                coaching.getStudents().size(),
+                totalStudents,
                 batches,
                 coaching.getUser().getEmail()
 

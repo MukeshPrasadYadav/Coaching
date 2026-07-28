@@ -24,8 +24,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Coaching extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @MapsId
+
+    private User user;
     @Column(nullable = false,length = 50)
     private String coachingName;
 
@@ -33,13 +38,7 @@ public class Coaching extends BaseEntity {
     @Builder.Default
     private CoachingStatus status = CoachingStatus.OPEN;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
 
-
-    @ManyToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
-    private List<Student> students;
 
     @OneToMany(mappedBy = "coaching",fetch = FetchType.LAZY)
     private List<Batch> batches;

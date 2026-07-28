@@ -4,23 +4,34 @@ package com.projects.coaching_offline_support.student.service.impl;
 import com.projects.coaching_offline_support.audit.entity.Auditable;
 import com.projects.coaching_offline_support.audit.enums.ActionType;
 import com.projects.coaching_offline_support.audit.enums.LogType;
+import com.projects.coaching_offline_support.batch.entity.Batch;
+import com.projects.coaching_offline_support.batch.repository.BatchRepository;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.Service.impl.ExcelExportService;
+import com.projects.coaching_offline_support.common.components.RepositoryUtils;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
+import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.student.dto.request.AddStudent;
+import com.projects.coaching_offline_support.student.dto.request.CompleteStudentProfileRequest;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
-import com.projects.coaching_offline_support.student.dto.response.StudentResponse;
+import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
+import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
 import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.student.repository.StudentRepository;
 import com.projects.coaching_offline_support.student.service.StudentService;
 import com.projects.coaching_offline_support.student.specification.StudentSpecification;
+import com.projects.coaching_offline_support.user.User;
+import com.projects.coaching_offline_support.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,41 +44,56 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final ExcelExportService excelExportService;
+    private final UserRepository userRepository;
+    private final BatchRepository batchRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
+    @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     @Auditable(
            logType = LogType.STUDENT,
             actionType = ActionType.CREATED,
-             description = " #{#request.email} in  batch #{#request.batch} in class #{#request.class_std}"
+             description = " #{#request.email} in  batch #{#request.batch}"
     )
-    public StudentResponse addStudent(AddStudent request) {
+    public StudentCoachingResponse addStudent(AddStudent request) {
 
-        Student student = Student.builder()
+        User user = User.builder()
                 .name(request.name())
                 .email(request.email())
                 .contactNumber(request.contactNumber())
-                .batch(request.batch())
-                .standard(request.class_std())
                 .address(request.address())
+                .hashedPassword(passwordEncoder.encode("Default_password"))
+                .role(Role.STUDENT)
+                .build();
+        userRepository.save(user);
+
+        Batch batch = RepositoryUtils.findOrThrowById(batchRepository,request.batch(),"Batch");
+
+        Student student = Student.builder()
+                .user(user)
                 .parentNumber(request.parentNumber())
                 .parentEmail(request.parentEmail())
                 .parentName(request.parentName())
                 .build();
+        
 
         studentRepository.save(student);
-        return new StudentResponse(student.getId(),student.getName(),student.getStandard(),student.getBatch(),student.getCreatedAt());
+        student.getBatches().add(batch);
+        
+        return StudentCoachingResponse.fromEntity(student);
 
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public Page<StudentResponse> getStudents(StudentFilter filter, Pageable pageable) {
+    public Page<StudentCoachingResponse> getStudents(StudentFilter filter, Pageable pageable) {
 
         return studentRepository.findAll(
                 StudentSpecification.filter(filter),
                 pageable
-        ).map(student -> new StudentResponse(student.getId(),student.getName(),student.getStandard(),student.getBatch(),student.getCreatedAt()));
+        ).map(StudentCoachingResponse::fromEntity);
     }
 
 
@@ -77,6 +103,8 @@ public class StudentServiceImpl implements StudentService {
             description = "Downloaded students list."
     )
     @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public ByteArrayInputStream exportStudents(StudentFilter filter) throws IOException {
 
         List<Student> students = studentRepository.findAll(StudentSpecification.filter(filter));
@@ -99,16 +127,49 @@ public class StudentServiceImpl implements StudentService {
                 students,
                 student -> List.of(
                         student.getId(),
-                        student.getName(),
-                        student.getContactNumber(),
-                        student.getEmail(),
-                        student.getStandard(),
+                        student.getUser().getName(),
+                        student.getUser().getContactNumber(),
+                        student.getUser().getEmail(),
+                        student.getBatches().stream().map(Batch::getName),
                         student.getCreatedAt(),
                         student.getParentName(),
                         student.getParentNumber(),
                         student.getParentEmail()
                 )
         );
+    }
+
+
+    @Transactional
+    @Auditable(
+            logType = LogType.STUDENT,
+            actionType = ActionType.PROFILE_COMPLETED,
+            description = "Student #{#request.email} completed profile."
+    )
+    @Override
+    public void completeProfile(CompleteStudentProfileRequest request) {
+
+        User user = RepositoryUtils.findOrThrowById(userRepository,CurrentUser.get().getId(), "Student");
+
+
+        user.setContactNumber(request.contactNumber());
+        user.setAddress(request.address());
+        user.setDob(request.dob());
+        user.setGender(request.gender());
+
+
+        user.setProfileCompleted(true);
+        user.setAddress(request.address());
+        User savedUser =  userRepository.save(user);
+
+        Student student = Student.builder()
+                .fatherName(request.fatherName())
+                .motherName(request.motherName())
+                .parentName(request.guardianName())
+                .parentNumber(request.parentNumber())
+                .parentEmail(request.parentEmail())
+                .build();
+
     }
 
 

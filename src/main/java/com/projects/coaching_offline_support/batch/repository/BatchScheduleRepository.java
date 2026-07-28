@@ -13,13 +13,13 @@ import java.util.UUID;
 @Repository
 public interface BatchScheduleRepository extends JpaRepository<BatchSchedule, UUID> {
 
-    @Query("""
-SELECT bs FROM BatchSchedule bs 
-WHERE bs.teacher.id =:teacherId 
-AND bs.day =:dayOfWeek
-""")
-    List<BatchSchedule> findByTeacherAndDay(
-            @Param("teacherId") UUID teacherId,
-            @Param("dayOfWeek")DaysOfWeek day
-            );
+//    @Query("""
+//SELECT bs FROM BatchSchedule bs
+//WHERE bs.teacher.id =:teacherId
+//AND bs.day =:dayOfWeek
+//""")
+//    List<BatchSchedule> findByTeacherAndDay(
+//            @Param("teacherId") UUID teacherId,
+//            @Param("dayOfWeek")DaysOfWeek day
+//            );
 }

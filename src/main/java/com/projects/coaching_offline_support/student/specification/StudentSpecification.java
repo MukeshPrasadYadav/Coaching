@@ -1,45 +1,67 @@
 package com.projects.coaching_offline_support.student.specification;
 
+import com.projects.coaching_offline_support.Coaching.entity.Coaching;
+import com.projects.coaching_offline_support.batch.entity.Batch;
+import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
 import com.projects.coaching_offline_support.student.entity.Student;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class StudentSpecification {
 
-    public static Specification<Student> filter(StudentFilter filter){
+    public static Specification<Student> filter(StudentFilter filter) {
 
-        return ((root, query, cb) -> {
+        return (root, query, cb) -> {
+
+            UUID coachingId = CurrentUser.get().getId();
+
+            assert query != null;
+            query.distinct(true);
+
             List<Predicate> predicates = new ArrayList<>();
-            // search
-            if(filter.search() != null  && !filter.search().isBlank()){
-                String keyWord = "%" + filter.search().toLowerCase() + "%";
+
+            // Student -> Batch
+            Join<Student, Batch> batchJoin = root.join("batches");
+
+            // Batch -> Coaching
+            Join<Batch, Coaching> coachingJoin = batchJoin.join("coaching");
+
+            // Only students of the logged-in coaching
+            predicates.add(
+                    cb.equal(coachingJoin.get("id"), coachingId)
+            );
+
+            // Search by student name
+            if (filter.search() != null && !filter.search().trim().isEmpty()) {
+
+                String keyword = "%" + filter.search().trim().toLowerCase() + "%";
 
                 predicates.add(
-                        cb.or(
-                                cb.like(cb.lower(root.get("name")),keyWord)
-
+                        cb.like(
+                                cb.lower(root.get("name")),
+                                keyword
                         )
-
                 );
-
             }
 
-
-
-            if(filter.toDate() != null){
+            // From Date
+            if (filter.fromDate() != null) {
                 predicates.add(
                         cb.greaterThanOrEqualTo(
                                 root.get("createdAt"),
-                                filter.toDate()
+                                filter.fromDate()
                         )
                 );
-
             }
-            if(filter.fromDate() != null){
+
+            // To Date
+            if (filter.toDate() != null) {
                 predicates.add(
                         cb.lessThanOrEqualTo(
                                 root.get("createdAt"),
@@ -48,8 +70,7 @@ public class StudentSpecification {
                 );
             }
 
-
-            return cb.and(predicates.toArray(new Predicate[0])) ;
-        });
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }

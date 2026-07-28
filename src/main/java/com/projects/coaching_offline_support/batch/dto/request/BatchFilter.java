@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.UUID;
 
 public record BatchFilter(
-        UUID coachingId,
         String coachingName,
         String search,
         LocalDateTime fromDate,

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import javax.security.auth.Subject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,15 +20,18 @@ public record AddBatchRequest(
 
         Integer studentCapacity,
         @NotBlank(message = "Batch name is required")
-        String batchName,
+        String name,
         @NotNull(message = "Provide subjects for the batch")
         List<String> subjects,
+        List<UUID> teachers,
         String classRoom,
-        BigDecimal fees,
-        LocalDate startingDate,
-        LocalDate endingDate
+        BigDecimal fee,
+        LocalDate startDate,
+        LocalDate endDate,
+        LocalTime startTime,
+        LocalTime endTime
 ) {
-        public  int getTotalStudentOrDefault(){
+        public  int getTotalStudentCapacityOrDefault(){
                 return studentCapacity != null ? studentCapacity : 20; // add a variable to decide size of student for coaching owner
         }
 }

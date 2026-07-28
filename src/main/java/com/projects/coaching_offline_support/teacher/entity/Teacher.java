@@ -62,12 +62,12 @@ public class Teacher extends BaseEntity {
     @Builder.Default
     private List<CoachingTeacher> coachingLinks = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(
-            name = "teacher_batches",
-            joinColumns = @JoinColumn(name = "teacher_id")
+    @OneToMany(
+            mappedBy = "teacher",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
     )
-    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY)
     @Builder.Default
     private List<BatchSchedule> schedules = new ArrayList<>();
 
