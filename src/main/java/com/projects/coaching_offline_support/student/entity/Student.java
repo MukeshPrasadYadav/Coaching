@@ -41,13 +41,10 @@ public class Student extends BaseEntity {
     private String motherName;
 
 
-    @Column(nullable = false)
     private String parentName;
 
-    @Column(nullable = false)
     private String parentNumber;
 
-    @Column(nullable = false)
     private String parentEmail;
 
     @ManyToMany

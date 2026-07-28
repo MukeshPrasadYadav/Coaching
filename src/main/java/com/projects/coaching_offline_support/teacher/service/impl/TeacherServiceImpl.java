@@ -124,7 +124,6 @@ public class TeacherServiceImpl implements TeacherService {
                     .email(request.email())
                     .address(request.address())
                     .hashedPassword(passwordEncoder.encode("Default_password"))
-                    .isProfileCompleted(true)
                     .build();
 
             User savedUser = userRepository.save(user);
