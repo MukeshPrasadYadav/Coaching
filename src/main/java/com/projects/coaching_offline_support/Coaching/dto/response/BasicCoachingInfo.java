@@ -1,4 +1,4 @@
-package com.projects.coaching_offline_support.Coaching.dto;
+package com.projects.coaching_offline_support.Coaching.dto.response;
 
 public record BasicCoachingInfo(
         String name,

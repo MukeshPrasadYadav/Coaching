@@ -11,7 +11,6 @@ public class CoachingOfflineSupportApplication {
 
 
 	public static void main(String[] args) {
-
 		SpringApplication.run(CoachingOfflineSupportApplication.class, args);
 	}
 

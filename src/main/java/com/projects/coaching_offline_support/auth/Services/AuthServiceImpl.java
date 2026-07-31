@@ -6,7 +6,14 @@ import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.auth.dtos.*;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.DuplicateException;
+import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
+import com.projects.coaching_offline_support.common.components.RepositoryUtils;
+import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.common.utils.CookieUtils;
+import com.projects.coaching_offline_support.student.entity.Student;
+import com.projects.coaching_offline_support.student.repository.StudentRepository;
+import com.projects.coaching_offline_support.teacher.entity.Teacher;
+import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
 import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
@@ -30,6 +38,8 @@ public class AuthServiceImpl implements AuthService{
     private  final UserRepository userRepository;
     private final  JwtService jwtService;
     private  final PasswordEncoder passwordEncoder;
+    private final TeacherRepository teacherRepository;
+    private final StudentRepository studentRepository;
     private final ApplicationEventPublisher publisher;
 
 
@@ -85,9 +95,15 @@ public class AuthServiceImpl implements AuthService{
     @Transactional
     public SignInResponse refreshToken(String refreshToken) {
 
+        String tokenType = jwtService.getTokenType(refreshToken);
+
+        if (!"refresh".equals(tokenType)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
         java.util.UUID id = jwtService.getUserIdFromToken(refreshToken);
-        if(id == null) throw  new RuntimeException("bad credentials");
-        User  user = userRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("No user found"));
+
+        User  user = RepositoryUtils.findOrThrowById(userRepository,id,"User");
         System.out.println("Id of user"+id);
 
         String accessToken = jwtService.generateAccessToken(user);
@@ -97,14 +113,24 @@ public class AuthServiceImpl implements AuthService{
     @Override
     @Transactional
     public UserDetail getMe() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User authenticatedUser = (User) authentication.getPrincipal();
 
+        UUID userId = CurrentUser.get().getId();
 
-        User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new ResourceNotFoundException("No user found"));
+        User user = RepositoryUtils.findOrThrowById(userRepository,userId, "User");
 
-       return new UserDetail(user.getId(),user.getName(),user.getEmail(),user.getContactNumber(),user.getRole(),user.isProfileCompleted(),user.getAddress());
-    }
+        if(user.getRole().equals(Role.TEACHER)){
+            Teacher teacher = RepositoryUtils.findOrThrowById(teacherRepository,userId,"Teacher");
+            return UserDetail.forTeacher(teacher);
+        }
+        else if(user.getRole().equals(Role.ADMIN)){
+            return UserDetail.forAdmin(user);
+        } else if (user.getRole().equals(Role.STUDENT)) {
+            Student student = RepositoryUtils.findOrThrowById(studentRepository,userId,"Student");
+            return UserDetail.forStudent(student);
+
+        }
+        return  null;
+       }
 
     @Override
     @Transactional

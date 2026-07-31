@@ -26,14 +26,7 @@ public final class CurrentUser {
     public static UserDetail detail() {
         User user = get();
 
-        return new UserDetail(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getContactNumber(),
-                user.getRole(),
-                user.isProfileCompleted(),
-                user.getAddress()
-        );
+        return UserDetail.forAdmin(user);
+
     }
 }

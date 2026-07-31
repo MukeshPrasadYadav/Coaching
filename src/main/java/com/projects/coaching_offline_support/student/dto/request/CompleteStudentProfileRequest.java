@@ -14,8 +14,8 @@ public record CompleteStudentProfileRequest(
         LocalDate dob,
         String fatherName,
         String motherName,
-        String guardianName,
-        String parentNumber,
+        String parentName,
+        String parentPhone,
         String parentEmail,
         String profilePic,
         Gender gender

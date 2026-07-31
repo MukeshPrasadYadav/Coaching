@@ -1,13 +1,9 @@
-package com.projects.coaching_offline_support.Coaching.dto;
+package com.projects.coaching_offline_support.Coaching.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
-import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.entity.Address;
-import com.projects.coaching_offline_support.common.entity.UserInfo;
 import com.projects.coaching_offline_support.student.entity.Student;
-import lombok.Builder;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +25,7 @@ public record CoachingResponse(
 
     public static CoachingResponse fromEntity(Coaching coaching){
         List<BatchInfo> batches = coaching.getBatches().stream()
-                .map(BatchInfo::fromEntity)
+                .map(BatchInfo::forAdmin)
                 .collect(Collectors.toList());
 
         int totalStudents = (int) coaching.getBatches()

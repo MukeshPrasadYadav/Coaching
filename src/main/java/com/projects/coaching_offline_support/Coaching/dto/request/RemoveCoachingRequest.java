@@ -1,4 +1,4 @@
-package com.projects.coaching_offline_support.Coaching.dto;
+package com.projects.coaching_offline_support.Coaching.dto.request;
 
 import com.projects.coaching_offline_support.Coaching.enums.ReasonToRemoveCoaching;
 import jakarta.validation.constraints.NotBlank;

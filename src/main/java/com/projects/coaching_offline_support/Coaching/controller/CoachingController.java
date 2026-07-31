@@ -1,19 +1,21 @@
 package com.projects.coaching_offline_support.Coaching.controller;
 
 
-import com.projects.coaching_offline_support.Coaching.dto.*;
+import com.projects.coaching_offline_support.Coaching.dto.request.AddCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.request.RemoveCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.response.AddCoachingResponse;
+import com.projects.coaching_offline_support.Coaching.dto.response.BasicCoachingInfo;
+import com.projects.coaching_offline_support.Coaching.dto.response.CoachingDashboard;
+import com.projects.coaching_offline_support.Coaching.dto.response.CoachingResponse;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.common.entity.Address;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -54,6 +56,13 @@ public class CoachingController {
     public ResponseEntity<ApiResponse<Void>> updateInfo(@PathVariable UUID coachingId, @RequestBody BasicCoachingInfo info){
        CoachingResponse response = coachingService.updateInfo(coachingId,info);
         return ResponseEntity.ok(ApiResponse.success("Address updated successfully"));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<CoachingDashboard>> getDashboard(){
+
+        CoachingDashboard response = coachingService.getDashboard();
+        return ResponseEntity.ok(ApiResponse.success(response,"Fetched data successfully"));
     }
 
 
