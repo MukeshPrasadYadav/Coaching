@@ -22,4 +22,6 @@ public interface BatchService {
     ByteArrayInputStream exportBatches(BatchFilter filter) throws IOException;
 
     List<BatchInfo> getBatches();
+
+
 }

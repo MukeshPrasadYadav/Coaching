@@ -27,11 +27,11 @@ public class NotificationStrategyFactory {
                 ));
     }
 
-    public NotificationStrategy get(NotificationType type) {
-        NotificationStrategy strategy = strategies.get(type);
+    public NotificationStrategy get(NotificationMode mode) {
+        NotificationStrategy strategy = strategies.get(mode);
 
         if (strategy == null) {
-            throw new IllegalArgumentException("No strategy found for " + type);
+            throw new IllegalArgumentException("No strategy found for " + mode);
         }
 
         return strategy;

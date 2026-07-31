@@ -3,6 +3,7 @@ package com.projects.coaching_offline_support.auth.Services;
 import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.user.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -32,6 +33,7 @@ public class JwtService {
                 .subject(user.getId().toString())
                 .claim("email",user.getEmail())
                 .claim("roles",user.getRole())
+                .claim("type","access")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 *60 * 60))
                 .signWith(getSecretKey())
@@ -43,6 +45,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(user.getId().toString())
+                .claim("type","refresh")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 *60*60*24*365 ))
                 .signWith(getSecretKey())
@@ -50,10 +53,21 @@ public class JwtService {
 
     }
 
-    public UUID getUserIdFromToken(String token){
-        log.info("receivedToken" + token);
+    public String getTokenType(String token) {
+
+        Claims claims = Jwts.parser()
+                .verifyWith(getSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.get("type", String.class);
+    }
+
+    public UUID getUserIdFromToken(String token) throws JwtException {
+
         Claims claims = Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload();
-        log.info("claims from token" + claims);
+
         return UUID.fromString( claims.getSubject());
     }
 

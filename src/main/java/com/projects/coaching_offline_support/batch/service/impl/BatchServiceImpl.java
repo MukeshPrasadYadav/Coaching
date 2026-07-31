@@ -29,6 +29,7 @@ import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.student.specification.StudentSpecification;
 import com.projects.coaching_offline_support.teacher.entity.Teacher;
 import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
+import com.projects.coaching_offline_support.user.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -133,20 +134,33 @@ public class BatchServiceImpl implements BatchService {
 
         Batch batch = RepositoryUtils.findOrThrowById(batchRepository,batchId,"batch");
 
-        return BatchInfo.fromEntity(batch);
+        return switch (CurrentUser.get().getRole()){
+            case ADMIN -> BatchInfo.forAdmin(batch);
+            case STUDENT -> BatchInfo.forStudent(batch);
+            case TEACHER -> BatchInfo.forTeacher(batch);
+
+            case PARENT -> null;
+        };
 
     }
 
     @Override
     public Page<BatchInfo> getBatch(BatchFilter filter,Pageable pageable) {
+        User user = CurrentUser.get();
 
         Sort sort = Sort.by(Sort.Order.desc("createdAt"));
 
         Page<Batch> info = batchRepository.findAll(
-                BatchSpecification.filter(filter),pageable
+                BatchSpecification.filter(filter,user),pageable
         );
 
-       return info.map(BatchInfo::fromEntity);
+       return switch (user.getRole()){
+           case ADMIN -> info.map(BatchInfo::forAdmin);
+           case STUDENT -> info.map(BatchInfo::forStudent);
+           case TEACHER -> info.map(BatchInfo::forTeacher);
+
+           case PARENT -> null;
+       };
     }
 
     @Auditable(
@@ -159,7 +173,7 @@ public class BatchServiceImpl implements BatchService {
     @PreAuthorize("hasRole('ADMIN')")
     public ByteArrayInputStream exportBatches(BatchFilter filter) throws IOException {
 
-        List<Batch> batches = batchRepository.findAll(BatchSpecification.filter(filter));
+        List<Batch> batches = batchRepository.findAll(BatchSpecification.filter(filter,CurrentUser.get()));
 
         List<String> headers = List.of(
                 "Batch Id",
@@ -202,9 +216,13 @@ public class BatchServiceImpl implements BatchService {
 
        List<Batch> batches = batchRepository.findByCoaching_Id(CurrentUser.get().getId());
        return batches.stream().map(
-               BatchInfo::fromEntity
+               BatchInfo::forAdmin
        ).toList();
     }
+
+
+
+
 
 
 }

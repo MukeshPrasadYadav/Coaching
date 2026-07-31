@@ -122,7 +122,7 @@ public class AuditAspect {
     public void sendNotification(Auditable auditable){
         if(auditable.notificationType()  == NotificationType.NONE) return;
         try{
-           NotificationStrategy strategy = notificationStrategyFactory.get(auditable.notificationType());
+           NotificationStrategy strategy = notificationStrategyFactory.get(NotificationMode.EMAIL); // later change it with notification type from aspect
             System.out.println("staratery"+strategy);
            strategy.send();
 

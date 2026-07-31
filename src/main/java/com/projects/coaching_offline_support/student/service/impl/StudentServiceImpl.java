@@ -69,6 +69,7 @@ public class StudentServiceImpl implements StudentService {
         userRepository.save(user);
 
         Batch batch = RepositoryUtils.findOrThrowById(batchRepository,request.batch(),"Batch");
+        batch.setTotalStudents(batch.getTotalStudents()+1);
 
         Student student = Student.builder()
                 .user(user)
@@ -105,6 +106,7 @@ public class StudentServiceImpl implements StudentService {
 
         List<Student> students = studentRepository.findAll(StudentSpecification.filter(filter));
 
+
         List<String> headers = List.of(
                 "Student Id",
                 "Name",
@@ -117,6 +119,7 @@ public class StudentServiceImpl implements StudentService {
                 "Prent email"
         );
 
+
         return excelExportService.export(
                 "Students",
                 headers,
@@ -128,9 +131,9 @@ public class StudentServiceImpl implements StudentService {
                         student.getUser().getEmail(),
                         student.getBatches().stream().map(Batch::getName),
                         student.getCreatedAt(),
-                        student.getParentName(),
-                        student.getParentNumber(),
-                        student.getParentEmail()
+                        safe(student.getParentName()),
+                        safe(student.getParentNumber()),
+                        safe(student.getParentEmail())
                 )
         );
     }
@@ -144,6 +147,8 @@ public class StudentServiceImpl implements StudentService {
     )
     @Override
     public void completeProfile(CompleteStudentProfileRequest request) {
+
+        System.out.println("Request studnet complete profile"+request);
 
         User user = RepositoryUtils.findOrThrowById(userRepository,CurrentUser.get().getId(), "User");
 
@@ -163,13 +168,18 @@ public class StudentServiceImpl implements StudentService {
         student.setFatherName(request.fatherName());
         student.setUser(savedUser);
         student.setMotherName(request.motherName());
-        student.setParentName(request.guardianName());
-        student.setParentNumber(request.parentNumber());
+        student.setParentName(request.parentName());
+        student.setParentNumber(request.parentPhone());
         student.setParentEmail(request.parentEmail());
 
 
         studentRepository.save(student);
 
+    }
+
+
+    private String safe(String value) {
+        return value == null || value.isBlank() ? "-" : value;
     }
 
 

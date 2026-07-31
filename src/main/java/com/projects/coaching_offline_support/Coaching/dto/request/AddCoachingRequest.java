@@ -1,7 +1,6 @@
-package com.projects.coaching_offline_support.Coaching.dto;
+package com.projects.coaching_offline_support.Coaching.dto.request;
 
 import com.projects.coaching_offline_support.common.entity.Address;
-import jakarta.persistence.Embedded;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.security;
 
 import com.projects.coaching_offline_support.auth.Services.JwtService;
 import com.projects.coaching_offline_support.user.User;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -33,9 +34,6 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info("Request URI: {}", request.getRequestURI());
-        log.info("Request URL: {}", request.getRequestURL());
-        log.info("Method: {}", request.getMethod());
 
         String token = null;
         String authHeader = request.getHeader("Authorization");
@@ -58,18 +56,34 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request,response);
             return;
         }
+        String tokenType = jwtService.getTokenType(token);
 
+        if (!"access".equals(tokenType)) {
 
-        String userId = jwtService.getUserIdFromToken(token).toString();
-        if(userId == null) {
-            filterChain.doFilter(request,response);
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Invalid access token"
+            );
+
             return;
         }
 
 
-        if(userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            log.info("getting userdetails");
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        UUID userId ;
+        try{
+            userId = jwtService.getUserIdFromToken(token);
+        } catch (JwtException e) {
+            log.warn("Invalid or expired jwt token {}",e.getMessage());
+            response.sendError( HttpServletResponse.SC_UNAUTHORIZED,"Invalid or expired token");
+
+            return;
+        }
+
+
+
+        if(SecurityContextHolder.getContext().getAuthentication() == null){
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userId.toString());
 
 
                 UsernamePasswordAuthenticationToken authenticaten =

@@ -1,39 +1,39 @@
 package com.projects.coaching_offline_support.Coaching.impl;
 
-import com.projects.coaching_offline_support.Coaching.dto.*;
+import com.projects.coaching_offline_support.Coaching.dto.request.AddCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.request.RemoveCoachingRequest;
+import com.projects.coaching_offline_support.Coaching.dto.response.AddCoachingResponse;
+import com.projects.coaching_offline_support.Coaching.dto.response.BasicCoachingInfo;
+import com.projects.coaching_offline_support.Coaching.dto.response.CoachingDashboard;
+import com.projects.coaching_offline_support.Coaching.dto.response.CoachingResponse;
 import com.projects.coaching_offline_support.Coaching.entity.Coaching;
 import com.projects.coaching_offline_support.Coaching.enums.CoachingStatus;
 import com.projects.coaching_offline_support.Coaching.repository.CoachingRepository;
 import com.projects.coaching_offline_support.Coaching.service.CoachingService;
-import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
-import com.projects.coaching_offline_support.batch.entity.Batch;
-import com.projects.coaching_offline_support.batch.enums.BatchStatus;
 import com.projects.coaching_offline_support.batch.repository.BatchRepository;
+
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.DuplicateException;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
 import com.projects.coaching_offline_support.common.entity.Address;
-import com.projects.coaching_offline_support.teacher.entity.CoachingTeacher;
-import com.projects.coaching_offline_support.teacher.entity.Teacher;
-import com.projects.coaching_offline_support.teacher.events.TeacherAddedEvent;
+import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
+import com.projects.coaching_offline_support.student.repository.StudentRepository;
+import com.projects.coaching_offline_support.teacher.repository.CoachingTeacherRepository;
 import com.projects.coaching_offline_support.teacher.repository.TeacherRepository;
 import com.projects.coaching_offline_support.user.User;
 import com.projects.coaching_offline_support.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +46,9 @@ public class CoachingServiceImpl implements CoachingService {
     private final BatchRepository batchRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher publisher;
+    private final CoachingTeacherRepository coachingTeacherRepository;
+    private final StudentRepository studentRepository;
+
     private final  String CACHE_NAME = "Coaching";
 
     @Override
@@ -146,8 +149,17 @@ public class CoachingServiceImpl implements CoachingService {
         return CoachingResponse.fromEntity(coaching);
     }
 
+    @Override
+    public CoachingDashboard getDashboard() {
+
+        UUID coachingId = CurrentUser.get().getId();
+        long totalStudent = batchRepository.getStudentCount(coachingId);
+
+        long totalTeachers = coachingTeacherRepository.countActiveTeachers(coachingId);
 
 
+        return new CoachingDashboard((int) totalStudent    , (int) totalTeachers);
+    }
 
 
 }
