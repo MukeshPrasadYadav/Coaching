@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.auth.Services;
 
 import com.projects.coaching_offline_support.auth.dtos.*;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.UserDetail;
 import com.projects.coaching_offline_support.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

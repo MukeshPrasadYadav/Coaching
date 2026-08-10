@@ -4,6 +4,7 @@ import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
 
 import com.projects.coaching_offline_support.teacher.dto.request.*;
+import com.projects.coaching_offline_support.teacher.dto.response.AppointTeacherResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
 import com.projects.coaching_offline_support.teacher.service.TeacherService;
@@ -47,14 +48,14 @@ public class TeacherController {
     }
 
     @GetMapping("/appoint")
-    public ResponseEntity<ApiResponse<Page<TeacherResponse>>> appointTeacher(
+    public ResponseEntity<ApiResponse<Page<AppointTeacherResponse>>> appointTeacher(
             AppointTeacherFilter filter,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int  pageSize,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC) Sort sort
     ){
         Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
-        Page<TeacherResponse> result = teacherService.appointTeacher(filter,pageable);
+        Page<AppointTeacherResponse> result = teacherService.appointTeacher(filter,pageable);
         return ResponseEntity.ok(ApiResponse.success(result,"Fetched students successfully"));
     }
 

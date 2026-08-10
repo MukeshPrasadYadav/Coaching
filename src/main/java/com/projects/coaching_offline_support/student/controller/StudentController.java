@@ -5,8 +5,10 @@ import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.student.dto.request.AddStudent;
 import com.projects.coaching_offline_support.student.dto.request.CompleteStudentProfileRequest;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
+import com.projects.coaching_offline_support.student.dto.request.UpdateStudentDetailRequest;
 import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
 
+import com.projects.coaching_offline_support.student.dto.response.StudentDetail;
 import com.projects.coaching_offline_support.student.service.StudentService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/students")
@@ -68,5 +71,10 @@ public class StudentController {
     public ResponseEntity<ApiResponse<Void>> completeProfile(@Valid @RequestBody CompleteStudentProfileRequest request){
         studentService.completeProfile(request);
         return ResponseEntity.ok(ApiResponse.success("Profile completed successfully"));
+    }
+
+    @GetMapping("{studentId}")
+    public ResponseEntity<ApiResponse<StudentDetail>> getStudentById(@PathVariable UUID studentId){
+        return ResponseEntity.ok(ApiResponse.success(studentService.getStudentById(studentId),"Fetched student successfully"));
     }
 }

@@ -4,8 +4,13 @@ import com.projects.coaching_offline_support.audit.entity.Auditable;
 import com.projects.coaching_offline_support.audit.enums.ActionType;
 import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.auth.dtos.*;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.AdminUserDetails;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.StudentUserDetails;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.TeacherUserDetails;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.UserDetail;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.DuplicateException;
+import com.projects.coaching_offline_support.common.Service.FileService;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
 import com.projects.coaching_offline_support.common.enums.Role;
@@ -40,6 +45,7 @@ public class AuthServiceImpl implements AuthService{
     private  final PasswordEncoder passwordEncoder;
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
+    private final FileService fileService;
     private final ApplicationEventPublisher publisher;
 
 
@@ -118,15 +124,23 @@ public class AuthServiceImpl implements AuthService{
 
         User user = RepositoryUtils.findOrThrowById(userRepository,userId, "User");
 
+
+        String profilePic = null;
+        if(user.getProfilePic() != null){
+            profilePic = fileService.getProfilePicture(user.getProfilePic());;
+        }
+
+
+
         if(user.getRole().equals(Role.TEACHER)){
             Teacher teacher = RepositoryUtils.findOrThrowById(teacherRepository,userId,"Teacher");
-            return UserDetail.forTeacher(teacher);
+            return TeacherUserDetails.from(teacher,profilePic);
         }
         else if(user.getRole().equals(Role.ADMIN)){
-            return UserDetail.forAdmin(user);
+            return AdminUserDetails.from(user,profilePic);
         } else if (user.getRole().equals(Role.STUDENT)) {
             Student student = RepositoryUtils.findOrThrowById(studentRepository,userId,"Student");
-            return UserDetail.forStudent(student);
+            return StudentUserDetails.from(student,profilePic);
 
         }
         return  null;

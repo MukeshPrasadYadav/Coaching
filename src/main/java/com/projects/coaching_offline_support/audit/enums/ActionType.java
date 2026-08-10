@@ -10,5 +10,6 @@ public enum ActionType {
     LOGGED_OUT,
     ADMITTED,
     DOWNLOADED,
-    PROFILE_COMPLETED
+    PROFILE_COMPLETED,
+    PROFILE_PICTURE
 }

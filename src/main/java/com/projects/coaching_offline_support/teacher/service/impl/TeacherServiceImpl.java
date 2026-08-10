@@ -9,6 +9,7 @@ import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.batch.entity.BatchSchedule;
 import com.projects.coaching_offline_support.common.Exceptions.DegreeNotFoundException;
 import com.projects.coaching_offline_support.common.Exceptions.ResourceNotFoundException;
+import com.projects.coaching_offline_support.common.Service.FileService;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.Service.impl.ExcelExportService;
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
@@ -16,6 +17,7 @@ import com.projects.coaching_offline_support.common.enums.DaysOfWeek;
 import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.student.dto.response.StudentBatchResponse;
 import com.projects.coaching_offline_support.teacher.dto.request.*;
+import com.projects.coaching_offline_support.teacher.dto.response.AppointTeacherResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
 import com.projects.coaching_offline_support.teacher.entity.CoachingTeacher;
@@ -57,6 +59,7 @@ public class TeacherServiceImpl implements TeacherService {
     private final CoachingRepository coachingRepository;
     private final ExcelExportService excelExportService;
     private final CoachingTeacherRepository coachingTeacherRepository;
+    private final FileService fileService;
 
 
     private static final LocalTime DEFAULT_START = LocalTime.of(9, 0);
@@ -127,7 +130,7 @@ public class TeacherServiceImpl implements TeacherService {
                     .contactNumber(request.contactNumber())
                     .email(request.email())
                     .address(request.address())
-                    .hashedPassword(passwordEncoder.encode("Default_password"))
+                        .hashedPassword(passwordEncoder.encode("Default_password"))
                     .build();
 
             User savedUser = userRepository.save(user);
@@ -227,11 +230,24 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    public Page<TeacherResponse> appointTeacher(AppointTeacherFilter filter, Pageable pageable) {
-        return  teacherRepository.findAll(
+    public Page<AppointTeacherResponse> appointTeacher(AppointTeacherFilter filter, Pageable pageable) {
+
+        Page<Teacher> teachers = teacherRepository.findAll(
                 AppointTeacherSpecification.filter(filter),
                 pageable
-        ).map(TeacherResponse::fromEntity);
+        );
+
+        Page<AppointTeacherResponse> response = teachers.map(teacher -> {
+            String profilePic = null;
+
+            if (teacher.getUser() != null && teacher.getUser().getProfilePic() != null) {
+                profilePic = fileService.getProfilePicture(teacher.getUser().getProfilePic());
+            }
+
+            return AppointTeacherResponse.fromEntity(teacher, profilePic);
+        });
+
+        return response;
     }
 
     @Override

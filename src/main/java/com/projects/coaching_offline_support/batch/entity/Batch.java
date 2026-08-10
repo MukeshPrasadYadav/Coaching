@@ -60,7 +60,7 @@ public class Batch extends BaseEntity {
     private BatchStatus status = BatchStatus.TO_BE_LAUNCHED;
 
    @Column(nullable = false)
-   private List<String> subjects;  // this will be later in batachSchedule
+   private Set<String> subjects;  // this will be later in batachSchedule
    
     private  String classRoom;
 

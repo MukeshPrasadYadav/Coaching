@@ -9,6 +9,7 @@ import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.batch.dto.request.AddBatchRequest;
 import com.projects.coaching_offline_support.batch.dto.request.BatchFilter;
 import com.projects.coaching_offline_support.batch.dto.response.BatchConflictResponse;
+import com.projects.coaching_offline_support.batch.dto.response.BatchDetail;
 import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
 import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.batch.entity.BatchSchedule;
@@ -45,10 +46,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +99,7 @@ public class BatchServiceImpl implements BatchService {
                 .fee(request.fee())
                 .startDate(request.startDate())
                 .endDate(request.endDate())
-                .subjects(request.subjects())
+                .subjects(new HashSet<>(request.subjects()))
                 .build();
         batchRepository.save(batch);
 
@@ -130,17 +128,11 @@ public class BatchServiceImpl implements BatchService {
     }
 
     @Override
-    public BatchInfo getBatchById(UUID coachingId, UUID batchId) {
+    public BatchDetail getBatchById(UUID batchId) {
 
         Batch batch = RepositoryUtils.findOrThrowById(batchRepository,batchId,"batch");
 
-        return switch (CurrentUser.get().getRole()){
-            case ADMIN -> BatchInfo.forAdmin(batch);
-            case STUDENT -> BatchInfo.forStudent(batch);
-            case TEACHER -> BatchInfo.forTeacher(batch);
-
-            case PARENT -> null;
-        };
+        return BatchDetail.fromEntity(batch);
 
     }
 

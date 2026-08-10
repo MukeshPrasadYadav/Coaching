@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.auth.Controller;
 
 import com.projects.coaching_offline_support.auth.Services.AuthService;
 import com.projects.coaching_offline_support.auth.dtos.*;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.UserDetail;
 import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.common.utils.CookieUtils;
 import jakarta.servlet.http.Cookie;
