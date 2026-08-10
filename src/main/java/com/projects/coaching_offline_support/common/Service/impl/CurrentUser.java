@@ -1,12 +1,15 @@
 package com.projects.coaching_offline_support.common.Service.impl;
 
-import com.projects.coaching_offline_support.auth.dtos.UserDetail;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.AdminUserDetails;
+import com.projects.coaching_offline_support.auth.dtos.UserDetailsRepsonse.UserDetail;
 import com.projects.coaching_offline_support.user.User;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public final class CurrentUser {
+
+  
 
     private CurrentUser() {
     }
@@ -26,7 +29,7 @@ public final class CurrentUser {
     public static UserDetail detail() {
         User user = get();
 
-        return UserDetail.forAdmin(user);
+        return AdminUserDetails.from(user,null);
 
     }
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "audit_info", indexes = {
         @Index(name = "idx_audit_actor", columnList = "actor"),
-        @Index(name = "idx_audit_entity", columnList = "logType,entityId")
+        @Index(name = "idx_audit_entity", columnList = "logType")
 })
 @Getter
 @Setter

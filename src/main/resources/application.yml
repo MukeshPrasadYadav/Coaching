@@ -36,6 +36,14 @@ spring:
             required: true
 
 
+aws:
+  region: ap-south-1
+  bucketName: coaching-offline-v2
+  credentials:
+    secret-key: ${AWS_SECRET_KEY}
+    access-key: ${AWS_ACCESS_KEY}
+
+
 jwt:
   security: ${JWT_SECURITY}
 logging:

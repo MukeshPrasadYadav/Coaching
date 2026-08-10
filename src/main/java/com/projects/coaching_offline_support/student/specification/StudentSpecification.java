@@ -5,6 +5,7 @@ import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
 import com.projects.coaching_offline_support.student.entity.Student;
+import com.projects.coaching_offline_support.user.User;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,6 +29,7 @@ public class StudentSpecification {
 
             // Student -> Batch
             Join<Student, Batch> batchJoin = root.join("batches");
+            Join<Student, User> userJoin = root.join("user");
 
             // Batch -> Coaching
             Join<Batch, Coaching> coachingJoin = batchJoin.join("coaching");
@@ -43,9 +45,11 @@ public class StudentSpecification {
                 String keyword = "%" + filter.search().trim().toLowerCase() + "%";
 
                 predicates.add(
-                        cb.like(
-                                cb.lower(root.get("name")),
-                                keyword
+                        cb.or(
+                                cb.like(cb.lower(userJoin.get("name")), keyword),
+                                cb.like(cb.lower(userJoin.get("email")), keyword),
+                                cb.like(cb.lower(userJoin.get("contactNumber")), keyword),
+                                cb.like(cb.lower(batchJoin.get("name")),keyword)
                         )
                 );
             }

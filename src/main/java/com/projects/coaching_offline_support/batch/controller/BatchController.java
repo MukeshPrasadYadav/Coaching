@@ -2,6 +2,7 @@ package com.projects.coaching_offline_support.batch.controller;
 
 import com.projects.coaching_offline_support.batch.dto.request.AddBatchRequest;
 import com.projects.coaching_offline_support.batch.dto.request.BatchFilter;
+import com.projects.coaching_offline_support.batch.dto.response.BatchDetail;
 import com.projects.coaching_offline_support.batch.dto.response.BatchInfo;
 import com.projects.coaching_offline_support.batch.enums.BatchStatus;
 import com.projects.coaching_offline_support.batch.service.BatchService;
@@ -44,10 +45,10 @@ public class BatchController {
         return ResponseEntity.ok(ApiResponse.success("Batch added successfully."));
     }
 
-    @GetMapping("{coachingId}/{batchId}")
-    public ResponseEntity<ApiResponse<BatchInfo>> getBatchById(@PathVariable UUID coachingId, @PathVariable UUID batchId){
-        BatchInfo batchInfo = batchService.getBatchById(coachingId,batchId);
-        return ResponseEntity.ok(ApiResponse.success(batchInfo,"Fetched batch information successfully."));
+    @GetMapping("/{batchId}")
+    public ResponseEntity<ApiResponse<BatchDetail>> getBatchById(@PathVariable UUID batchId){
+        com.projects.coaching_offline_support.batch.dto.response.BatchDetail batch = batchService.getBatchById(batchId);
+        return ResponseEntity.ok(ApiResponse.success(batch,"Fetched batch information successfully."));
     }
 
     @GetMapping("/getBatchForEnroll")

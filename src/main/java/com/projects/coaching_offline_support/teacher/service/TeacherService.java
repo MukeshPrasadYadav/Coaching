@@ -1,6 +1,7 @@
 package com.projects.coaching_offline_support.teacher.service;
 
 import com.projects.coaching_offline_support.teacher.dto.request.*;
+import com.projects.coaching_offline_support.teacher.dto.response.AppointTeacherResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherCoachingResponse;
 import com.projects.coaching_offline_support.teacher.dto.response.TeacherResponse;
 import jakarta.validation.Valid;
@@ -23,7 +24,7 @@ public interface TeacherService {
 
     ByteArrayInputStream exportTeachers(TeacherFilter filter) throws IOException;
 
-    Page<TeacherResponse> appointTeacher(AppointTeacherFilter filter, Pageable pageable);
+    Page<AppointTeacherResponse> appointTeacher(AppointTeacherFilter filter, Pageable pageable);
 
     List<TeacherResponse> getTeacherByCoachingId(UUID coachingId);
 }

@@ -8,23 +8,25 @@ import com.projects.coaching_offline_support.teacher.repository.TeacherRepositor
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BatchInfo(
         UUID id,
 
-     //   String teacherName,
+        //   String teacherName,
 //Map<DaysOfWeek,Timing> timing,
         String coachingName,
         BatchStatus status,
         Integer totalStudents,
         String name,
-        List<String> teachers,
+        Set<String> teachers,
         LocalTime startTime,
         LocalTime endTime,
-        List<String> subjects  // this will be later in schedule event
+        Set<String> subjects  // this will be later in schedule event
 ) {
 
     public static BatchInfo forStudent(Batch batch){
@@ -35,7 +37,7 @@ public record BatchInfo(
                 batch.getStatus(),
                 null,
                 batch.getName(),
-                batchSchedules.stream().map( batchSchedule -> batchSchedule.getTeacher().getUser().getName()).toList(),
+                batchSchedules.stream().map( batchSchedule -> batchSchedule.getTeacher().getUser().getName()).collect(Collectors.toSet()),
                 null,
                 null,
                 batch.getSubjects()
@@ -47,7 +49,7 @@ public record BatchInfo(
                 batch.getId(),
                 batch.getCoaching().getCoachingName(),
                 batch.getStatus(),
-                null,
+                batch.getStudents().size(),
                 batch.getName(),
                 null,
                 null,
@@ -63,7 +65,7 @@ public record BatchInfo(
                 batch.getStatus(),
                 batch.getStudents().size(),
                 batch.getName(),
-                batchSchedules.stream().map( batchSchedule -> batchSchedule.getTeacher().getUser().getName()).toList(),
+                batchSchedules.stream().map( batchSchedule -> batchSchedule.getTeacher().getUser().getName()).collect(Collectors.toSet()),
                 batchSchedules.getFirst().getTiming().getStartTime(),
                 batchSchedules.getFirst().getTiming().getEndTime(),
                 batch.getSubjects()

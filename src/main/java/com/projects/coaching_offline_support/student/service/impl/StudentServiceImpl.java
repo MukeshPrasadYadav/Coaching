@@ -6,16 +6,16 @@ import com.projects.coaching_offline_support.audit.enums.ActionType;
 import com.projects.coaching_offline_support.audit.enums.LogType;
 import com.projects.coaching_offline_support.batch.entity.Batch;
 import com.projects.coaching_offline_support.batch.repository.BatchRepository;
+import com.projects.coaching_offline_support.common.Service.FileService;
 import com.projects.coaching_offline_support.common.Service.impl.CurrentUser;
 import com.projects.coaching_offline_support.common.Service.impl.ExcelExportService;
 import com.projects.coaching_offline_support.common.components.RepositoryUtils;
-import com.projects.coaching_offline_support.common.dtos.ApiResponse;
 import com.projects.coaching_offline_support.common.enums.Role;
 import com.projects.coaching_offline_support.student.dto.request.AddStudent;
 import com.projects.coaching_offline_support.student.dto.request.CompleteStudentProfileRequest;
 import com.projects.coaching_offline_support.student.dto.request.StudentFilter;
 import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
-import com.projects.coaching_offline_support.student.dto.response.StudentCoachingResponse;
+import com.projects.coaching_offline_support.student.dto.response.StudentDetail;
 import com.projects.coaching_offline_support.student.entity.Student;
 import com.projects.coaching_offline_support.student.repository.StudentRepository;
 import com.projects.coaching_offline_support.student.service.StudentService;
@@ -26,8 +26,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -47,6 +46,7 @@ public class StudentServiceImpl implements StudentService {
     private final UserRepository userRepository;
     private final BatchRepository batchRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileService fileService;
 
 
     @Override
@@ -157,6 +157,7 @@ public class StudentServiceImpl implements StudentService {
         user.setAddress(request.address());
         user.setDob(request.dob());
         user.setGender(request.gender());
+        user.setProfilePic(request.profilePic());
 
 
         user.setProfileCompleted(true);
@@ -174,6 +175,21 @@ public class StudentServiceImpl implements StudentService {
 
 
         studentRepository.save(student);
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public StudentDetail getStudentById(UUID studentId) {
+        User user = CurrentUser.get();
+        Student student = RepositoryUtils.findOrThrowById(studentRepository,studentId,"Student");
+
+        String profilePic = null;
+        if(student.getUser().getProfilePic() != null){
+            profilePic = fileService.getProfilePicture(student.getUser().getProfilePic());
+        }
+        return StudentDetail.forAdmin(student,profilePic);
 
     }
 
