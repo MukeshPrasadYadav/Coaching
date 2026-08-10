@@ -125,9 +125,14 @@ public class AuthServiceImpl implements AuthService{
         User user = RepositoryUtils.findOrThrowById(userRepository,userId, "User");
 
 
+
         String profilePic = null;
         if(user.getProfilePic() != null){
             profilePic = fileService.getProfilePicture(user.getProfilePic());;
+        }
+
+        if(!user.isProfileCompleted()){
+            return AdminUserDetails.from(user,profilePic);
         }
 
 
