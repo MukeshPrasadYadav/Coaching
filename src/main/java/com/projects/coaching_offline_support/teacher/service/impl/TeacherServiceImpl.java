@@ -83,8 +83,8 @@ public class TeacherServiceImpl implements TeacherService {
         // Todo set profile picture
       User savedUser =  userRepository.save(user);
 
-      Teacher teacher = null;
-      teacher = RepositoryUtils.findOrThrowById(teacherRepository,CurrentUser.get().getId(), "Teacher");
+      Teacher teacher = teacherRepository.findById(user.getId()).orElseGet(() -> Teacher.builder().user(savedUser).build());
+
 
       teacher.setFee(request.fee());
       teacher.setDegrees(request.degrees());
