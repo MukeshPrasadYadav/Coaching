@@ -164,7 +164,7 @@ public class StudentServiceImpl implements StudentService {
         user.setAddress(request.address());
         User savedUser =  userRepository.save(user);
 
-        Student student = RepositoryUtils.findOrThrowById(studentRepository,CurrentUser.get().getId(), "Student");
+        Student student = studentRepository.findById(user.getId()).orElseGet(() -> Student.builder().user(savedUser).build());
 
         student.setFatherName(request.fatherName());
         student.setUser(savedUser);
