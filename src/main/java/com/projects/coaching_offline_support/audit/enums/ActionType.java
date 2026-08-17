@@ -11,5 +11,6 @@ public enum ActionType {
     ADMITTED,
     DOWNLOADED,
     PROFILE_COMPLETED,
-    PROFILE_PICTURE
+    PROFILE_PICTURE,
+    OTP_SENT
 }
